@@ -42,11 +42,7 @@ export default async function HomePage() {
   });
 
   if (session?.user) {
-    if (session.user.role === "ADMIN") {
-      redirect("/admin/dashboard");
-    } else {
-      redirect("/user/dashboard");
-    }
+    redirect("/user/dashboard");
   }
 
   const recipes = await getPublicRecipes();
