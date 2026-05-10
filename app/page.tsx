@@ -86,6 +86,7 @@ export default async function HomePage() {
                       src={`https://picsum.photos/800/600?random=${recipe.id}`}
                       alt={recipe.title}
                       fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       className="object-cover"
                     />
                   </div>
