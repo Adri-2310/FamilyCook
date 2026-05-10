@@ -85,7 +85,7 @@ model Account {
   id                 String    @id @default(cuid())
   accountId          String
   providerId         String
-  providerAccountId  String
+  providerAccountId  String?
   refreshToken       String?
   accessToken        String?
   accessTokenExpiresAt DateTime?
