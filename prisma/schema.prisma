@@ -93,6 +93,7 @@ model Account {
   scope              String?
   idToken            String?
   sessionState       String?
+  password           String?
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 
