@@ -63,10 +63,11 @@ async function getRecipes(
 export default async function MyRecipesPage({
   searchParams,
 }: {
-  searchParams: Record<string, string | string[] | undefined>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const result = await getRecipes(searchParams);
-  const page = parseInt((searchParams.page as string) || "1");
+  const params = await searchParams;
+  const result = await getRecipes(params);
+  const page = parseInt((params.page as string) || "1");
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -154,7 +155,7 @@ export default async function MyRecipesPage({
                       key={p}
                       href={`/recipe/my?${new URLSearchParams({
                         ...Object.fromEntries(
-                          Object.entries(searchParams).filter(
+                          Object.entries(params).filter(
                             ([key]) => key !== "page"
                           )
                         ),
