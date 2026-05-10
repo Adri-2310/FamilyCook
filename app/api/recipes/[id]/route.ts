@@ -4,11 +4,12 @@ import { headers } from "next/headers";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const recipe = await db.recipe.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         ingredients: {
           orderBy: { order: "asc" },
@@ -35,7 +36,7 @@ export async function GET(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -46,8 +47,9 @@ export async function DELETE(
   }
 
   try {
+    const { id } = await params;
     const recipe = await db.recipe.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!recipe) {
@@ -63,7 +65,7 @@ export async function DELETE(
     }
 
     await db.recipe.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return Response.json({ success: true });
