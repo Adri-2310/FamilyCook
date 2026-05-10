@@ -50,7 +50,6 @@ model User {
   name          String?
   email         String    @unique
   emailVerified Boolean   @default(false)
-  password      String?
   image         String?
   role          Role      @default(USER)
   active        Boolean   @default(true)
@@ -82,25 +81,21 @@ model Session {
 }
 
 model Account {
-  id                 String    @id @default(cuid())
-  accountId          String
-  providerId         String
-  providerAccountId  String?
-  refreshToken       String?
-  accessToken        String?
-  accessTokenExpiresAt DateTime?
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
   refreshTokenExpiresAt DateTime?
-  scope              String?
-  idToken            String?
-  sessionState       String?
-  password           String?
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([providerId, providerAccountId])
   @@map("accounts")
 }
 

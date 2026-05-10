@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:www.better-auth.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:www.prisma.io)",
+      "WebFetch(domain:www.answeroverflow.com)",
+      "WebFetch(domain:dev.to)",
+      "WebFetch(domain:jb.desishub.com)",
+      "PowerShell($env:DATABASE_URL=\"postgresql://neondb_owner:npg_nMop4Qju8PCv@ep-proud-cloud-albogj46-pooler.c-3.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require\"; cd 'C:\\\\Users\\\\warse\\\\Documents\\\\myCode\\\\web\\\\FamilyCook'; npx prisma migrate deploy)",
+      "PowerShell($env:DATABASE_URL=\"postgresql://neondb_owner:npg_nMop4Qju8PCv@ep-proud-cloud-albogj46-pooler.c-3.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require\"; cd 'C:\\\\Users\\\\warse\\\\Documents\\\\myCode\\\\web\\\\FamilyCook'; npx prisma generate)"
+    ]
+  }
+}
