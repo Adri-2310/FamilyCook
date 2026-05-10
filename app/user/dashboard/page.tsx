@@ -1,13 +1,40 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { auth } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 
 export default async function UserDashboard() {
-  // TODO: Récupérer les stats de l'utilisateur (Phase 5)
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session?.user) {
+    redirect("/auth/login");
+  }
+
+  const [totalRecipes, publicRecipes, totalFavorites, recentRecipes] = await Promise.all([
+    db.recipe.count({ where: { userId: session.user.id } }),
+    db.recipe.count({ where: { userId: session.user.id, isPublic: true } }),
+    db.favorite.count({ where: { userId: session.user.id } }),
+    db.recipe.findMany({
+      where: { userId: session.user.id },
+      orderBy: { createdAt: "desc" },
+      take: 3,
+      include: {
+        user: {
+          select: { id: true, name: true, email: true, image: true },
+        },
+      },
+    }),
+  ]);
+
   const stats = {
-    totalRecipes: 0,
-    publicRecipes: 0,
-    totalFavorites: 0,
+    totalRecipes,
+    publicRecipes,
+    totalFavorites,
   };
 
   return (
@@ -23,7 +50,7 @@ export default async function UserDashboard() {
         <Card className="p-6 hover:shadow-md transition-shadow">
           <div className="text-sm font-medium text-muted-foreground">Mes recettes</div>
           <div className="text-3xl font-bold mt-2">{stats.totalRecipes}</div>
-          <Link href="/user/recipes" className="text-xs text-primary hover:underline mt-4 block">
+          <Link href="/recipe/my" className="text-xs text-primary hover:underline mt-4 block">
             Voir tous →
           </Link>
         </Card>
@@ -43,17 +70,17 @@ export default async function UserDashboard() {
         <Card className="p-6">
           <h2 className="text-lg font-bold mb-4">Actions rapides</h2>
           <div className="space-y-3">
-            <Link href="/user/recipes/new" className="block">
+            <Link href="/recipe/my/new" className="block">
               <Button className="w-full" size="sm">
                 ➕ Créer une nouvelle recette
               </Button>
             </Link>
-            <Link href="/user/recipes" className="block">
+            <Link href="/recipe/my" className="block">
               <Button variant="outline" className="w-full" size="sm">
                 📋 Gérer mes recettes
               </Button>
             </Link>
-            <Link href="/user/profile" className="block">
+            <Link href="/profile" className="block">
               <Button variant="outline" className="w-full" size="sm">
                 👤 Mon profil
               </Button>
@@ -63,10 +90,21 @@ export default async function UserDashboard() {
 
         <Card className="p-6">
           <h2 className="text-lg font-bold mb-4">Recettes récentes</h2>
-          <div className="space-y-2 text-sm text-muted-foreground">
-            <p>Aucune recette pour le moment</p>
-            <p>Créez votre première recette pour la voir ici</p>
-          </div>
+          {recentRecipes.length > 0 ? (
+            <div className="space-y-3">
+              {recentRecipes.map((recipe) => (
+                <Link key={recipe.id} href={`/recipe/my/show/${recipe.id}`} className="block hover:opacity-80 transition-opacity">
+                  <div className="text-sm font-medium line-clamp-1">{recipe.title}</div>
+                  <div className="text-xs text-muted-foreground">{new Date(recipe.createdAt).toLocaleDateString("fr-FR")}</div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-2 text-sm text-muted-foreground">
+              <p>Aucune recette pour le moment</p>
+              <p>Créez votre première recette pour la voir ici</p>
+            </div>
+          )}
         </Card>
       </div>
     </div>
