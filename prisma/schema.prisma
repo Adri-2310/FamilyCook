@@ -1,0 +1,212 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Category {
+  APPETIZER
+  MAIN
+  DESSERT
+  BREAKFAST
+  SAUCE
+  BREAD
+  DRINK
+  OTHER
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum Visibility {
+  PUBLIC
+  PRIVATE
+}
+
+// ============================================================================
+// USER & AUTH
+// ============================================================================
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  password      String?
+  image         String?
+  role          Role      @default(USER)
+  active        Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  recipes    Recipe[]
+  favorites  Favorite[]
+  sessions   Session[]
+  accounts   Account[]
+  verifications Verification[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model Account {
+  id                 String    @id @default(cuid())
+  accountId          String
+  providerId         String
+  providerAccountId  String
+  refreshToken       String?
+  accessToken        String?
+  accessTokenExpiresAt DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope              String?
+  idToken            String?
+  sessionState       String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, providerAccountId])
+  @@map("accounts")
+}
+
+model Verification {
+  id        String   @id @default(cuid())
+  identifier String
+  token     String   @unique
+  expires   DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([identifier, token])
+  @@map("verifications")
+}
+
+// ============================================================================
+// RECIPES
+// ============================================================================
+
+model Recipe {
+  id               String      @id @default(cuid())
+  title            String
+  description      String
+  coverImageUrl    String
+  additionalImages String[]
+  category         Category
+  prepTime         Int
+  cookTime         Int?
+  difficulty       Difficulty
+  baseServings     Int
+  visibility       Visibility  @default(PRIVATE)
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  ingredients Ingredient[]
+  steps       Step[]
+  tags        RecipeTag[]
+  favorites   Favorite[]
+
+  @@index([userId])
+  @@index([visibility])
+  @@map("recipes")
+}
+
+model Ingredient {
+  id       String @id @default(cuid())
+  name     String
+  quantity Float
+  unit     String?
+  order    Int
+
+  recipeId String
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@map("ingredients")
+}
+
+model Step {
+  id      String @id @default(cuid())
+  content String
+  order   Int
+
+  recipeId String
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@map("steps")
+}
+
+model Tag {
+  id   String @id @default(cuid())
+  name String @unique
+
+  recipes RecipeTag[]
+
+  @@map("tags")
+}
+
+model RecipeTag {
+  recipeId String
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  tagId String
+  tag   Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([recipeId, tagId])
+  @@map("recipe_tags")
+}
+
+// ============================================================================
+// FAVORITES
+// ============================================================================
+
+model Favorite {
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  recipeId String
+  recipe   Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@id([userId, recipeId])
+  @@map("favorites")
+}
