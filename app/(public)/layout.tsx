@@ -1,4 +1,6 @@
 import { ReactNode } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default function PublicLayout({
   children,
@@ -6,24 +8,87 @@ export default function PublicLayout({
   children: ReactNode;
 }) {
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="border-b">
+    <div className="min-h-screen flex flex-col bg-background">
+      <header className="border-b sticky top-0 z-50 bg-background">
         <nav className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="text-2xl font-bold">FamilyCook</div>
-          <div className="flex gap-4">
-            <a href="/auth/login" className="text-sm hover:underline">
-              Connexion
-            </a>
-            <a href="/auth/register" className="text-sm hover:underline">
-              Inscription
-            </a>
+          <Link href="/" className="flex items-center gap-2">
+            <div className="text-2xl font-bold">🍳 FamilyCook</div>
+          </Link>
+          <div className="flex gap-3">
+            <Link href="/auth/login">
+              <Button variant="ghost" size="sm">
+                Connexion
+              </Button>
+            </Link>
+            <Link href="/auth/register">
+              <Button size="sm">
+                S'inscrire
+              </Button>
+            </Link>
           </div>
         </nav>
       </header>
+
       <main className="flex-1">{children}</main>
-      <footer className="border-t bg-muted py-8">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>&copy; 2026 FamilyCook. Tous droits réservés.</p>
+
+      <footer className="border-t bg-muted/30 mt-16">
+        <div className="container mx-auto px-4 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            <div>
+              <h3 className="font-bold mb-4">FamilyCook</h3>
+              <p className="text-sm text-muted-foreground">
+                Partagez vos recettes en famille.
+              </p>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-4 text-sm">Produit</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>
+                  <Link href="/" className="hover:text-foreground">
+                    Accueil
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/auth/register" className="hover:text-foreground">
+                    S'inscrire
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-4 text-sm">Ressources</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>
+                  <Link href="/" className="hover:text-foreground">
+                    Documentation
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/" className="hover:text-foreground">
+                    Support
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-4 text-sm">Légal</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>
+                  <Link href="/" className="hover:text-foreground">
+                    Conditions
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/" className="hover:text-foreground">
+                    Confidentialité
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t pt-8 text-center text-sm text-muted-foreground">
+            <p>&copy; 2026 FamilyCook. Tous droits réservés.</p>
+          </div>
         </div>
       </footer>
     </div>
