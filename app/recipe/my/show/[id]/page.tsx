@@ -6,6 +6,9 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { ServingsAdjuster } from "@/components/recipes/servings-adjuster";
+import { IngredientList } from "@/components/recipes/ingredient-list";
+import { useServings } from "@/hooks/use-servings";
 
 interface Recipe {
   id: string;
@@ -41,6 +44,8 @@ export default function RecipeShowPage() {
   const [deleting, setDeleting] = useState(false);
 
   const recipeId = params.id as string;
+
+  const servingsManager = useServings(recipe?.baseServings || 1, recipe?.ingredients || []);
 
   useEffect(() => {
     if (isPending) return;
@@ -169,21 +174,28 @@ export default function RecipeShowPage() {
           </Card>
         </div>
 
+        {/* Portions ajustables */}
+        <div className="mb-8">
+          <ServingsAdjuster
+            currentServings={servingsManager.currentServings}
+            baseServings={servingsManager.baseServings}
+            onIncrement={servingsManager.increment}
+            onDecrement={servingsManager.decrement}
+            onSetServings={servingsManager.setServings}
+          />
+        </div>
+
         {/* Ingrédients */}
         {recipe.ingredients.length > 0 && (
           <div className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Ingrédients</h2>
             <Card className="p-4">
-              <ul className="space-y-2">
-                {recipe.ingredients.map((ingredient) => (
-                  <li key={ingredient.id} className="flex justify-between">
-                    <span>{ingredient.name}</span>
-                    <span className="text-muted-foreground">
-                      {ingredient.quantity} {ingredient.unit}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+              <IngredientList
+                ingredients={servingsManager.adjustedIngredients}
+                servingsModified={
+                  servingsManager.currentServings !==
+                  servingsManager.baseServings
+                }
+              />
             </Card>
           </div>
         )}
