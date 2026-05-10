@@ -32,4 +32,15 @@ export const auth = betterAuth({
       maxAge: 5 * 60, // 5 minutes cache
     },
   },
+
+  // Add custom fields to user (role will be included in session automatically)
+  user: {
+    additionalFields: {
+      role: {
+        type: "string",
+        input: false,
+        defaultValue: "USER",
+      },
+    },
+  },
 });
