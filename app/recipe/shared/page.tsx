@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
-import { SearchBar } from "@/components/recipes/search-bar";
-import { Filters } from "@/components/recipes/filters";
-import { SortDropdown } from "@/components/recipes/sort-dropdown";
+import { RecipeSearchFilters } from "@/components/recipes/recipe-search-filters";
 
 interface SearchResult {
   recipes: any[];
@@ -11,7 +9,9 @@ interface SearchResult {
   totalPages: number;
 }
 
-async function getRecipes(searchParams: Record<string, string | string[] | undefined>): Promise<SearchResult> {
+async function getRecipes(
+  searchParams: Record<string, string | string[] | undefined>
+): Promise<SearchResult> {
   const params = new URLSearchParams();
 
   if (searchParams.search) {
@@ -54,39 +54,30 @@ export default async function SharedRecipesPage({
   const page = parseInt((searchParams.page as string) || "1");
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Recettes partagées</h1>
-        <p className="text-muted-foreground">
+    <div className="container mx-auto px-4 py-12">
+      <div className="mb-12">
+        <h1 className="text-4xl font-bold mb-3">Recettes partagées</h1>
+        <p className="text-lg text-muted-foreground">
           Découvrez les recettes publiques de la communauté
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
-        <div className="lg:col-span-3 space-y-4">
-          <SearchBar />
-          <div className="flex justify-between items-center">
-            <p className="text-sm text-muted-foreground">
-              {result.total} recette{result.total !== 1 ? "s" : ""}
+      <RecipeSearchFilters />
+
+      <p className="text-xs text-muted-foreground mb-8">
+        {result.total} recette{result.total !== 1 ? "s" : ""} trouvée
+        {result.total !== 1 ? "s" : ""}
+      </p>
+
+      <div>
+        {result.recipes.length === 0 ? (
+          <Card className="p-8 text-center">
+            <p className="text-muted-foreground">
+              Aucune recette trouvée correspondant à vos critères
             </p>
-            <SortDropdown />
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div>
-          <Filters />
-        </div>
-
-        <div className="lg:col-span-3">
-          {result.recipes.length === 0 ? (
-            <Card className="p-8 text-center">
-              <p className="text-muted-foreground">
-                Aucune recette trouvée correspondant à vos critères
-              </p>
-            </Card>
-          ) : (
+          </Card>
+        ) : (
+          <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
               {result.recipes.map((recipe) => (
                 <Link
@@ -124,7 +115,8 @@ export default async function SharedRecipesPage({
                       </div>
                       {recipe.favoriteCount > 0 && (
                         <div className="text-xs text-muted-foreground">
-                          ❤️ {recipe.favoriteCount} like{recipe.favoriteCount !== 1 ? "s" : ""}
+                          ❤️ {recipe.favoriteCount} like
+                          {recipe.favoriteCount !== 1 ? "s" : ""}
                         </div>
                       )}
                     </div>
@@ -132,35 +124,35 @@ export default async function SharedRecipesPage({
                 </Link>
               ))}
             </div>
-          )}
 
-          {result.totalPages > 1 && (
-            <div className="mt-8 flex justify-center gap-2">
-              {Array.from({ length: result.totalPages }, (_, i) => i + 1).map(
-                (p) => (
-                  <Link
-                    key={p}
-                    href={`/recipe/shared?${new URLSearchParams({
-                      ...Object.fromEntries(
-                        Object.entries(searchParams).filter(
-                          ([key]) => key !== "page"
-                        )
-                      ),
-                      page: p.toString(),
-                    }).toString()}`}
-                    className={`px-3 py-1 rounded text-sm ${
-                      page === p
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted hover:bg-muted/80"
-                    }`}
-                  >
-                    {p}
-                  </Link>
-                )
-              )}
-            </div>
-          )}
-        </div>
+            {result.totalPages > 1 && (
+              <div className="mt-8 flex justify-center gap-2">
+                {Array.from({ length: result.totalPages }, (_, i) => i + 1).map(
+                  (p) => (
+                    <Link
+                      key={p}
+                      href={`/recipe/shared?${new URLSearchParams({
+                        ...Object.fromEntries(
+                          Object.entries(searchParams).filter(
+                            ([key]) => key !== "page"
+                          )
+                        ),
+                        page: p.toString(),
+                      }).toString()}`}
+                      className={`px-3 py-1 rounded text-sm ${
+                        page === p
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted hover:bg-muted/80"
+                      }`}
+                    >
+                      {p}
+                    </Link>
+                  )
+                )}
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

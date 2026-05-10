@@ -1,8 +1,9 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { ChevronDown } from "lucide-react";
+import { useState } from "react";
 
 const CATEGORIES = [
   { value: "APPETIZER", label: "Apéritif" },
@@ -24,6 +25,8 @@ const DIFFICULTIES = [
 export function Filters() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [openCategory, setOpenCategory] = useState(false);
+  const [openDifficulty, setOpenDifficulty] = useState(false);
 
   const selectedCategory = searchParams.get("category");
   const selectedDifficulty = searchParams.get("difficulty");
@@ -45,29 +48,46 @@ export function Filters() {
 
   const hasActiveFilters = selectedCategory || selectedDifficulty;
 
+  const getCategoryLabel = () => {
+    const cat = CATEGORIES.find((c) => c.value === selectedCategory);
+    return cat ? cat.label : "Catégorie";
+  };
+
+  const getDifficultyLabel = () => {
+    const diff = DIFFICULTIES.find((d) => d.value === selectedDifficulty);
+    return diff ? diff.label : "Difficulté";
+  };
+
   return (
-    <Card className="p-6 space-y-6">
-      <div>
-        <h3 className="font-semibold mb-3">Catégorie</h3>
-        <div className="space-y-2">
+    <div className="flex flex-wrap gap-3 items-center">
+      <div className="relative inline-block group">
+        <button className="flex items-center gap-2 px-4 py-2 bg-background border border-muted rounded-lg hover:border-primary hover:bg-primary/5 text-sm font-medium transition">
+          {getCategoryLabel()}
+          <ChevronDown className="w-4 h-4" />
+        </button>
+        <div className="absolute left-0 top-full mt-2 w-56 bg-background border border-muted rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 overflow-hidden">
           <button
-            onClick={() => updateFilter("category", "ALL")}
-            className={`block w-full text-left px-3 py-2 rounded text-sm ${
-              !selectedCategory
-                ? "bg-primary text-primary-foreground"
-                : "hover:bg-muted"
+            onClick={() => {
+              updateFilter("category", "ALL");
+              setOpenCategory(false);
+            }}
+            className={`block w-full text-left px-4 py-3 text-sm font-medium transition ${
+              !selectedCategory ? "bg-primary text-primary-foreground" : "hover:bg-muted/50"
             }`}
           >
-            Toutes
+            Toutes les catégories
           </button>
           {CATEGORIES.map((cat) => (
             <button
               key={cat.value}
-              onClick={() => updateFilter("category", cat.value)}
-              className={`block w-full text-left px-3 py-2 rounded text-sm ${
+              onClick={() => {
+                updateFilter("category", cat.value);
+                setOpenCategory(false);
+              }}
+              className={`block w-full text-left px-4 py-3 text-sm transition ${
                 selectedCategory === cat.value
-                  ? "bg-primary text-primary-foreground"
-                  : "hover:bg-muted"
+                  ? "bg-primary text-primary-foreground font-semibold"
+                  : "hover:bg-muted/50"
               }`}
             >
               {cat.label}
@@ -76,27 +96,34 @@ export function Filters() {
         </div>
       </div>
 
-      <div>
-        <h3 className="font-semibold mb-3">Difficulté</h3>
-        <div className="space-y-2">
+      <div className="relative inline-block group">
+        <button className="flex items-center gap-2 px-4 py-2 bg-background border border-muted rounded-lg hover:border-primary hover:bg-primary/5 text-sm font-medium transition">
+          {getDifficultyLabel()}
+          <ChevronDown className="w-4 h-4" />
+        </button>
+        <div className="absolute left-0 top-full mt-2 w-56 bg-background border border-muted rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 overflow-hidden">
           <button
-            onClick={() => updateFilter("difficulty", "ALL")}
-            className={`block w-full text-left px-3 py-2 rounded text-sm ${
-              !selectedDifficulty
-                ? "bg-primary text-primary-foreground"
-                : "hover:bg-muted"
+            onClick={() => {
+              updateFilter("difficulty", "ALL");
+              setOpenDifficulty(false);
+            }}
+            className={`block w-full text-left px-4 py-3 text-sm font-medium transition ${
+              !selectedDifficulty ? "bg-primary text-primary-foreground" : "hover:bg-muted/50"
             }`}
           >
-            Toutes
+            Toutes les difficultés
           </button>
           {DIFFICULTIES.map((diff) => (
             <button
               key={diff.value}
-              onClick={() => updateFilter("difficulty", diff.value)}
-              className={`block w-full text-left px-3 py-2 rounded text-sm ${
+              onClick={() => {
+                updateFilter("difficulty", diff.value);
+                setOpenDifficulty(false);
+              }}
+              className={`block w-full text-left px-4 py-3 text-sm transition ${
                 selectedDifficulty === diff.value
-                  ? "bg-primary text-primary-foreground"
-                  : "hover:bg-muted"
+                  ? "bg-primary text-primary-foreground font-semibold"
+                  : "hover:bg-muted/50"
               }`}
             >
               {diff.label}
@@ -110,11 +137,11 @@ export function Filters() {
           variant="outline"
           size="sm"
           onClick={clearFilters}
-          className="w-full"
+          className="text-xs"
         >
-          Réinitialiser les filtres
+          Réinitialiser
         </Button>
       )}
-    </Card>
+    </div>
   );
 }

@@ -1,13 +1,6 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 const SORT_OPTIONS = [
   { value: "recent", label: "Plus récentes" },
@@ -21,7 +14,8 @@ export function SortDropdown() {
   const searchParams = useSearchParams();
   const sort = searchParams.get("sort") || "recent";
 
-  const handleSort = (value: string) => {
+  const handleSort = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
     const params = new URLSearchParams(searchParams);
     params.set("sort", value);
     params.set("page", "1");
@@ -29,17 +23,16 @@ export function SortDropdown() {
   };
 
   return (
-    <Select value={sort} onValueChange={handleSort}>
-      <SelectTrigger className="w-48">
-        <SelectValue placeholder="Trier par..." />
-      </SelectTrigger>
-      <SelectContent>
-        {SORT_OPTIONS.map((option) => (
-          <SelectItem key={option.value} value={option.value}>
-            {option.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <select
+      value={sort}
+      onChange={handleSort}
+      className="h-10 px-4 py-2 bg-background border border-muted rounded-lg hover:border-primary hover:bg-primary/5 text-sm font-medium transition cursor-pointer"
+    >
+      {SORT_OPTIONS.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </select>
   );
 }
