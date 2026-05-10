@@ -24,8 +24,11 @@ export function AppNavbar() {
           <Link href="/user/dashboard" className="text-sm hover:text-primary transition">
             Tableau de bord
           </Link>
-          <Link href="/user/recipes" className="text-sm hover:text-primary transition">
-            Recettes
+          <Link href="/recipe/my" className="text-sm hover:text-primary transition">
+            Mes recettes
+          </Link>
+          <Link href="/recipe/shared" className="text-sm hover:text-primary transition">
+            Recettes partagées
           </Link>
           <Link href="/user/profile" className="text-sm hover:text-primary transition">
             Profil
