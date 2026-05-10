@@ -30,6 +30,9 @@ export function AppNavbar() {
           <Link href="/recipe/shared" className="text-sm hover:text-primary transition">
             Recettes partagées
           </Link>
+          <Link href="/recipe/favorites" className="text-sm hover:text-primary transition">
+             Favoris
+          </Link>
           <Link href="/user/profile" className="text-sm hover:text-primary transition">
             Profil
           </Link>
