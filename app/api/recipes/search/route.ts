@@ -21,12 +21,12 @@ export async function GET(request: Request) {
     if (search.trim()) {
       conditions.push({
         OR: [
-          { title: { contains: search, mode: "insensitive" } },
-          { description: { contains: search, mode: "insensitive" } },
+          { title: { startsWith: search, mode: "insensitive" } },
+          { description: { startsWith: search, mode: "insensitive" } },
           {
             ingredients: {
               some: {
-                name: { contains: search, mode: "insensitive" },
+                name: { startsWith: search, mode: "insensitive" },
               },
             },
           },
