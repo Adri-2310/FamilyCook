@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import { db } from "@/lib/db";
+import Image from "next/image";
 import { Clock, ChefHat } from "lucide-react";
 
 export const metadata = {
@@ -78,14 +79,15 @@ export default async function HomePage() {
               {recipes.map((recipe) => (
                 <Card
                   key={recipe.id}
-                  className="overflow-hidden hover:shadow-lg transition-shadow cursor-not-allowed opacity-75"
+                  className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
                 >
                   <div className="relative h-48 bg-gradient-to-br from-slate-400 to-slate-600 overflow-hidden">
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                      <p className="text-white font-semibold text-center px-4">
-                        Connectez-vous pour voir
-                      </p>
-                    </div>
+                    <Image
+                      src={`https://picsum.photos/800/600?random=${recipe.id}`}
+                      alt={recipe.title}
+                      fill
+                      className="object-cover"
+                    />
                   </div>
                   <div className="p-4">
                     <h3 className="font-bold text-lg mb-2 line-clamp-2">
