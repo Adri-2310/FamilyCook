@@ -9,33 +9,59 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("🌱 Seeding database...");
 
-  // Create admin user
-  const adminPassword = await bcrypt.hash("Admin123!@#", 10);
-  const admin = await prisma.user.create({
-    data: {
-      name: "Admin",
-      email: "admin@familycook.com",
+  // Create or update admin user with Better Auth account
+  const adminPassword = await bcrypt.hash("Ma161123@#", 10);
+  const admin = await prisma.user.upsert({
+    where: { email: "adrien@hotmail.be" },
+    update: {
+      name: "Adrien Mertens",
       emailVerified: true,
-      password: adminPassword,
       role: "ADMIN",
       active: true,
     },
-  });
-  console.log("✓ Admin user created");
-
-  // Create a regular user
-  const userPassword = await bcrypt.hash("User123!@#", 10);
-  const user = await prisma.user.create({
-    data: {
-      name: "Jean Dupont",
-      email: "jean@example.com",
+    create: {
+      name: "Adrien Mertens",
+      email: "adrien@hotmail.be",
       emailVerified: true,
-      password: userPassword,
+      role: "ADMIN",
+      active: true,
+      accounts: {
+        create: {
+          accountId: "adrien@hotmail.be",
+          providerId: "credential",
+          password: adminPassword,
+        },
+      },
+    },
+  });
+  console.log("✓ Admin user ready (adrien@hotmail.be)");
+
+  // Create or update regular user with Better Auth account
+  const userPassword = await bcrypt.hash("User123!@#", 10);
+  const user = await prisma.user.upsert({
+    where: { email: "jean@example.com" },
+    update: {
+      name: "Jean Dupont",
+      emailVerified: true,
       role: "USER",
       active: true,
     },
+    create: {
+      name: "Jean Dupont",
+      email: "jean@example.com",
+      emailVerified: true,
+      role: "USER",
+      active: true,
+      accounts: {
+        create: {
+          accountId: "jean@example.com",
+          providerId: "credential",
+          password: userPassword,
+        },
+      },
+    },
   });
-  console.log("✓ Regular user created");
+  console.log("✓ Regular user ready");
 
   // Create demo recipes
   const recipeIds: string[] = [];
