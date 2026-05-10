@@ -1,6 +1,6 @@
 "use client";
 
-import { formatQuantity } from "@/lib/fractions";
+import { formatQuantityWithUnit } from "@/lib/fractions";
 
 interface Ingredient {
   id: string;
@@ -31,11 +31,19 @@ export function IngredientList({
           >
             <span className="text-sm text-muted-foreground">•</span>
             <span className="text-sm">
-              <span className="font-medium">
-                {formatQuantity(ingredient.quantity)}
-              </span>
-              {ingredient.unit && <span className="ml-1">{ingredient.unit}</span>}
-              <span className="ml-2">{ingredient.name}</span>
+              {(() => {
+                const { quantity, unit } = formatQuantityWithUnit(
+                  ingredient.quantity,
+                  ingredient.unit
+                );
+                return (
+                  <>
+                    <span className="font-medium">{quantity}</span>
+                    {unit && <span className="ml-1">{unit}</span>}
+                    <span className="ml-2">{ingredient.name}</span>
+                  </>
+                );
+              })()}
             </span>
           </li>
         ))}

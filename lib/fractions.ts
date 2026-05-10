@@ -41,3 +41,38 @@ export function recalculateQuantity(
 ): number {
   return (baseQuantity * desiredServings) / baseServings;
 }
+
+export function formatQuantityWithUnit(
+  quantity: number,
+  unit?: string
+): { quantity: string; unit: string } {
+  if (!unit) {
+    return { quantity: formatQuantity(quantity), unit: "" };
+  }
+
+  const rounded = Math.round(quantity * 100) / 100;
+
+  // Conversions
+  if (unit === "kg" && rounded < 1) {
+    return {
+      quantity: formatQuantity(rounded * 1000),
+      unit: "g",
+    };
+  }
+
+  if (unit === "l" && rounded < 1) {
+    return {
+      quantity: formatQuantity(rounded * 1000),
+      unit: "ml",
+    };
+  }
+
+  if (unit === "cl" && rounded >= 10) {
+    return {
+      quantity: formatQuantity(rounded / 100),
+      unit: "l",
+    };
+  }
+
+  return { quantity: formatQuantity(quantity), unit };
+}
