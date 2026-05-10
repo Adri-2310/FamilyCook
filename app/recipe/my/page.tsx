@@ -22,11 +22,15 @@ interface Recipe {
 
 export default function MyRecipesPage() {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, isPending } = useSession();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Attendre que la session soit chargée
+    if (isPending) return;
+
+    // Rediriger si pas connecté
     if (!session?.user) {
       router.push("/auth/login");
       return;
@@ -47,7 +51,7 @@ export default function MyRecipesPage() {
     };
 
     fetchRecipes();
-  }, [session, router]);
+  }, [session, isPending, router]);
 
   if (loading) {
     return (

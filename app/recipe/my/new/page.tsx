@@ -7,15 +7,16 @@ import { RecipeForm } from "@/components/recipe-form";
 
 export default function NewRecipePage() {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, isPending } = useSession();
 
   useEffect(() => {
+    if (isPending) return;
     if (!session?.user) {
       router.push("/auth/login");
     }
-  }, [session, router]);
+  }, [session, isPending, router]);
 
-  if (!session?.user) {
+  if (isPending || !session?.user) {
     return null;
   }
 

@@ -35,7 +35,7 @@ interface Recipe {
 export default function RecipeShowPage() {
   const router = useRouter();
   const params = useParams();
-  const { data: session } = useSession();
+  const { data: session, isPending } = useSession();
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
@@ -43,6 +43,7 @@ export default function RecipeShowPage() {
   const recipeId = params.id as string;
 
   useEffect(() => {
+    if (isPending) return;
     if (!session?.user) {
       router.push("/auth/login");
       return;
