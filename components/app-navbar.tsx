@@ -17,14 +17,14 @@ export function AppNavbar() {
   return (
     <header className="border-b sticky top-0 z-50 bg-background">
       <nav className="container mx-auto px-4 py-4 flex items-center justify-between">
-        <Link href="/app/recipes" className="flex items-center gap-2">
+        <Link href="/user/recipes" className="flex items-center gap-2">
           <div className="text-2xl font-bold">🍳 FamilyCook</div>
         </Link>
         <div className="flex items-center gap-6">
-          <Link href="/app/recipes" className="text-sm hover:text-primary transition">
+          <Link href="/user/recipes" className="text-sm hover:text-primary transition">
             Recettes
           </Link>
-          <Link href="/app/profile" className="text-sm hover:text-primary transition">
+          <Link href="/user/profile" className="text-sm hover:text-primary transition">
             Profil
           </Link>
           {session?.user?.role === "ADMIN" && (
