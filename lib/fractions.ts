@@ -23,7 +23,15 @@ export function decimalToFraction(decimal: number): string {
 }
 
 export function formatQuantity(quantity: number): string {
-  return Math.round(quantity).toString();
+  if (quantity === 0) return "0";
+
+  const rounded = Math.round(quantity * 100) / 100;
+
+  if (rounded === Math.floor(rounded)) {
+    return rounded.toString();
+  }
+
+  return rounded.toFixed(2).replace(/\.?0+$/, "");
 }
 
 export function recalculateQuantity(
