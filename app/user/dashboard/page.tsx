@@ -17,7 +17,7 @@ export default async function UserDashboard() {
 
   const [totalRecipes, publicRecipes, totalFavorites, recentRecipes] = await Promise.all([
     db.recipe.count({ where: { userId: session.user.id } }),
-    db.recipe.count({ where: { userId: session.user.id, isPublic: true } }),
+    db.recipe.count({ where: { userId: session.user.id, visibility: "PUBLIC" } }),
     db.favorite.count({ where: { userId: session.user.id } }),
     db.recipe.findMany({
       where: { userId: session.user.id },
