@@ -194,13 +194,7 @@ export default function RecipeShowPage() {
         {recipe.ingredients.length > 0 && servingsManager && (
           <div className="mb-8">
             <Card className="p-4">
-              <IngredientList
-                ingredients={servingsManager.adjustedIngredients}
-                servingsModified={
-                  servingsManager.currentServings !==
-                  servingsManager.baseServings
-                }
-              />
+              <IngredientList ingredients={servingsManager.adjustedIngredients} />
             </Card>
           </div>
         )}
