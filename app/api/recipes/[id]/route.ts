@@ -11,6 +11,7 @@ export async function GET(
     const recipe = await db.recipe.findUnique({
       where: { id },
       include: {
+        user: true,
         ingredients: {
           orderBy: { order: "asc" },
         },
@@ -26,7 +27,6 @@ export async function GET(
 
     return Response.json(recipe);
   } catch (error) {
-    console.error("Erreur:", error);
     return Response.json(
       { error: "Erreur lors du chargement" },
       { status: 500 }
@@ -70,7 +70,6 @@ export async function DELETE(
 
     return Response.json({ success: true });
   } catch (error) {
-    console.error("Erreur:", error);
     return Response.json(
       { error: "Erreur lors de la suppression" },
       { status: 500 }

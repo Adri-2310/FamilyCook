@@ -23,20 +23,7 @@ export function decimalToFraction(decimal: number): string {
 }
 
 export function formatQuantity(quantity: number): string {
-  const whole = Math.floor(quantity);
-  const decimal = quantity - whole;
-
-  if (decimal === 0) {
-    return whole.toString();
-  }
-
-  const fraction = decimalToFraction(decimal);
-
-  if (whole === 0) {
-    return fraction;
-  }
-
-  return `${whole} ${fraction}`;
+  return Math.round(quantity).toString();
 }
 
 export function recalculateQuantity(

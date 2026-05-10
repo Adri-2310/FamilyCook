@@ -45,7 +45,10 @@ export default function RecipeShowPage() {
 
   const recipeId = params.id as string;
 
-  const servingsManager = useServings(recipe?.baseServings || 1, recipe?.ingredients || []);
+  const servingsManager = useServings(
+    recipe?.baseServings ?? 1,
+    recipe?.ingredients ?? []
+  );
 
   useEffect(() => {
     if (isPending) return;
@@ -69,7 +72,6 @@ export default function RecipeShowPage() {
           router.push("/recipe/my");
         }
       } catch (error) {
-        console.error("Erreur:", error);
         router.push("/recipe/my");
       } finally {
         setLoading(false);
@@ -98,7 +100,6 @@ export default function RecipeShowPage() {
         alert("Erreur lors de la suppression");
       }
     } catch (error) {
-      console.error("Erreur:", error);
       alert("Erreur lors de la suppression");
     } finally {
       setDeleting(false);
@@ -175,18 +176,20 @@ export default function RecipeShowPage() {
         </div>
 
         {/* Portions ajustables */}
-        <div className="mb-8">
-          <ServingsAdjuster
-            currentServings={servingsManager.currentServings}
-            baseServings={servingsManager.baseServings}
-            onIncrement={servingsManager.increment}
-            onDecrement={servingsManager.decrement}
-            onSetServings={servingsManager.setServings}
-          />
-        </div>
+        {servingsManager && (
+          <div className="mb-8">
+            <ServingsAdjuster
+              currentServings={servingsManager.currentServings}
+              baseServings={servingsManager.baseServings}
+              onIncrement={servingsManager.increment}
+              onDecrement={servingsManager.decrement}
+              onSetServings={servingsManager.setServings}
+            />
+          </div>
+        )}
 
         {/* Ingrédients */}
-        {recipe.ingredients.length > 0 && (
+        {recipe.ingredients.length > 0 && servingsManager && (
           <div className="mb-8">
             <Card className="p-4">
               <IngredientList

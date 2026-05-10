@@ -42,11 +42,13 @@ export default function SharedRecipeShowPage() {
   const params = useParams();
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
-  const [servings, setServingsState] = useState<any>(null);
 
   const recipeId = params.id as string;
 
-  const servingsManager = useServings(recipe?.baseServings || 1, recipe?.ingredients || []);
+  const servingsManager = useServings(
+    recipe?.baseServings ?? 1,
+    recipe?.ingredients ?? []
+  );
 
   useEffect(() => {
     const fetchRecipe = async () => {
@@ -64,7 +66,6 @@ export default function SharedRecipeShowPage() {
           router.push("/recipe/shared");
         }
       } catch (error) {
-        console.error("Erreur:", error);
         router.push("/recipe/shared");
       } finally {
         setLoading(false);
@@ -110,7 +111,7 @@ export default function SharedRecipeShowPage() {
             <div className="flex-1">
               <h1 className="text-4xl font-bold mb-2">{recipe.title}</h1>
               <p className="text-sm text-muted-foreground mb-4">
-                Par {recipe.user.name || recipe.user.email}
+                Par {recipe.user?.name || recipe.user?.email}
               </p>
             </div>
           </div>
@@ -146,18 +147,20 @@ export default function SharedRecipeShowPage() {
         </div>
 
         {/* Portions ajustables */}
-        <div className="mb-8">
-          <ServingsAdjuster
-            currentServings={servingsManager.currentServings}
-            baseServings={servingsManager.baseServings}
-            onIncrement={servingsManager.increment}
-            onDecrement={servingsManager.decrement}
-            onSetServings={servingsManager.setServings}
-          />
-        </div>
+        {servingsManager && (
+          <div className="mb-8">
+            <ServingsAdjuster
+              currentServings={servingsManager.currentServings}
+              baseServings={servingsManager.baseServings}
+              onIncrement={servingsManager.increment}
+              onDecrement={servingsManager.decrement}
+              onSetServings={servingsManager.setServings}
+            />
+          </div>
+        )}
 
         {/* Ingrédients */}
-        {recipe.ingredients.length > 0 && (
+        {recipe.ingredients.length > 0 && servingsManager && (
           <div className="mb-8">
             <Card className="p-4">
               <IngredientList
