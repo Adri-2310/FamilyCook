@@ -1,16 +1,23 @@
 import { PrismaClient, Category, Difficulty, Visibility } from "@prisma/client";
-import * as bcrypt from "bcrypt";
+import { scryptSync, randomBytes } from "crypto";
 import * as dotenv from "dotenv";
 
 dotenv.config({ path: ".env.local" });
 
 const prisma = new PrismaClient();
 
+// Fonction de hash compatible avec Better Auth
+function hashPassword(password: string): string {
+  const salt = randomBytes(16);
+  const derivedKey = scryptSync(password, salt, 64);
+  return `${salt.toString("hex")}.${derivedKey.toString("hex")}`;
+}
+
 async function main() {
   console.log("🌱 Seeding database...");
 
   // Create or update admin user with Better Auth account
-  const adminPassword = await bcrypt.hash("Ma161123@#", 10);
+  const adminPassword = hashPassword("Ma161123@#");
   const admin = await prisma.user.upsert({
     where: { email: "adrien@hotmail.be" },
     update: {
@@ -37,7 +44,7 @@ async function main() {
   console.log("✓ Admin user ready (adrien@hotmail.be)");
 
   // Create or update regular user with Better Auth account
-  const userPassword = await bcrypt.hash("User123!@#", 10);
+  const userPassword = hashPassword("User123!@#");
   const user = await prisma.user.upsert({
     where: { email: "jean@example.com" },
     update: {
