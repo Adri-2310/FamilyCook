@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { RecipeSearchFilters } from "@/components/recipes/recipe-search-filters";
-import { getSession } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 
 interface SearchResult {
   recipes: any[];
@@ -15,7 +16,10 @@ interface SearchResult {
 async function getRecipes(
   searchParams: Record<string, string | string[] | undefined>
 ): Promise<SearchResult> {
-  const session = await getSession();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
   if (!session?.user) {
     redirect("/auth/login");
   }
@@ -41,14 +45,17 @@ async function getRecipes(
   try {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_APP_URL}/api/recipes/my?${params.toString()}`,
-      { cache: "no-store" }
+      {
+        cache: "no-store",
+        credentials: "include",
+        headers: await headers(),
+      }
     );
     if (response.ok) {
       return response.json();
     }
     return { recipes: [], total: 0, page: 1, totalPages: 0 };
   } catch (error) {
-    console.error("Erreur:", error);
     return { recipes: [], total: 0, page: 1, totalPages: 0 };
   }
 }
