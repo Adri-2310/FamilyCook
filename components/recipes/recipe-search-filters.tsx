@@ -30,7 +30,11 @@ const SORT_OPTIONS = [
   { value: "popular", label: "Plus likées" },
 ];
 
-export function RecipeSearchFilters() {
+interface RecipeSearchFiltersProps {
+  basePath?: string;
+}
+
+export function RecipeSearchFilters({ basePath = "/recipe/shared" }: RecipeSearchFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [query, setQuery] = useState(searchParams.get("search") || "");
@@ -50,9 +54,9 @@ export function RecipeSearchFilters() {
         }
       });
       params.set("page", "1");
-      router.push(`/recipe/shared?${params.toString()}`);
+      router.push(`${basePath}?${params.toString()}`);
     },
-    [searchParams, router]
+    [searchParams, router, basePath]
   );
 
   const handleSearch = () => {
@@ -207,7 +211,7 @@ export function RecipeSearchFilters() {
             size="sm"
             onClick={() => {
               setQuery("");
-              router.push("/recipe/shared");
+              router.push(basePath);
             }}
             className="text-xs"
           >

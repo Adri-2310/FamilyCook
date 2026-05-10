@@ -62,7 +62,7 @@ export default async function SharedRecipesPage({
         </p>
       </div>
 
-      <RecipeSearchFilters />
+      <RecipeSearchFilters basePath="/recipe/shared" />
 
       <p className="text-xs text-muted-foreground mb-8">
         {result.total} recette{result.total !== 1 ? "s" : ""} trouvée

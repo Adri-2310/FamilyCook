@@ -1,8 +1,9 @@
-import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { Prisma } from "@prisma/client";
 
-export async function GET() {
+export async function GET(request: Request) {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -11,34 +12,90 @@ export async function GET() {
     return Response.json({ error: "Non authentifié" }, { status: 401 });
   }
 
+  const { searchParams } = new URL(request.url);
+
+  const search = searchParams.get("search") || "";
+  const category = searchParams.get("category");
+  const difficulty = searchParams.get("difficulty");
+  const sort = searchParams.get("sort") || "recent";
+  const page = parseInt(searchParams.get("page") || "1");
+  const limit = 12;
+
   try {
-    const recipes = await db.recipe.findMany({
-      where: {
-        userId: session.user.id,
+    // Construire les filtres
+    const where: Prisma.RecipeWhereInput = {
+      userId: session.user.id,
+    };
+
+    // Filtre recherche
+    if (search.trim()) {
+      where.OR = [
+        { title: { contains: search, mode: "insensitive" } },
+        { description: { contains: search, mode: "insensitive" } },
+        {
+          ingredients: {
+            some: {
+              name: { contains: search, mode: "insensitive" },
+            },
+          },
+        },
+      ];
+    }
+
+    // Filtre catégorie
+    if (category && category !== "ALL") {
+      where.category = category as any;
+    }
+
+    // Filtre difficulté
+    if (difficulty && difficulty !== "ALL") {
+      where.difficulty = difficulty as any;
+    }
+
+    // Récupérer le total
+    const total = await db.recipe.count({ where });
+
+    // Récupérer les recettes
+    let recipes = await db.recipe.findMany({
+      where,
+      include: {
+        user: {
+          select: { id: true, name: true, email: true, image: true },
+        },
+        ingredients: true,
+        favorites: true,
       },
-      select: {
-        id: true,
-        title: true,
-        description: true,
-        coverImageUrl: true,
-        category: true,
-        difficulty: true,
-        visibility: true,
-        baseServings: true,
-        prepTime: true,
-        cookTime: true,
-        createdAt: true,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
+      skip: (page - 1) * limit,
+      take: limit,
     });
 
-    return Response.json(recipes);
+    // Trier après récupération
+    if (sort === "oldest") {
+      recipes.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+    } else if (sort === "a-z") {
+      recipes.sort((a, b) => a.title.localeCompare(b.title));
+    } else if (sort === "popular") {
+      recipes.sort((a, b) => b.favorites.length - a.favorites.length);
+    } else {
+      // recent (défaut)
+      recipes.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    }
+
+    const formattedRecipes = recipes.map((recipe) => ({
+      ...recipe,
+      favoriteCount: recipe.favorites.length,
+    }));
+
+    return Response.json({
+      recipes: formattedRecipes,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+    });
   } catch (error) {
-    console.error("Erreur:", error);
+    console.error("Erreur recherche:", error);
     return Response.json(
-      { error: "Erreur lors du chargement des recettes" },
+      { error: "Erreur lors de la recherche" },
       { status: 500 }
     );
   }
