@@ -44,9 +44,11 @@ export async function POST(request: Request) {
 
     return Response.json({ url: blob.url });
   } catch (error) {
-    console.error("Erreur upload:", error);
+    console.error("Erreur upload détaillée:", error);
+    const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
+    console.error("Message:", errorMessage);
     return Response.json(
-      { error: "Erreur lors de l'upload" },
+      { error: `Erreur lors de l'upload: ${errorMessage}` },
       { status: 500 }
     );
   }

@@ -101,6 +101,7 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
 
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
 
   const handleInputChange = (
     e: React.ChangeEvent<
@@ -152,10 +153,7 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
     setSteps(steps.filter((_, i) => i !== index));
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  const uploadFile = async (file: File) => {
     setUploading(true);
     try {
       const formData = new FormData();
@@ -173,13 +171,41 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
           coverImageUrl: url,
         }));
       } else {
-        alert("Erreur lors de l'upload de l'image");
+        const error = await response.json();
+        alert(`Erreur: ${error.error || "Erreur lors de l'upload de l'image"}`);
       }
     } catch (error) {
       console.error("Erreur:", error);
       alert("Erreur lors de l'upload");
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    uploadFile(file);
+  };
+
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      uploadFile(file);
     }
   };
 
@@ -255,7 +281,17 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
           <label className="block text-sm font-medium mb-2">
             Image de couverture
           </label>
-          <div className="border-2 border-dashed border-muted-foreground/20 rounded-lg p-6 text-center hover:border-primary/50 transition cursor-pointer">
+          <div
+            onDragEnter={handleDrag}
+            onDragLeave={handleDrag}
+            onDragOver={handleDrag}
+            onDrop={handleDrop}
+            className={`border-2 border-dashed rounded-lg p-6 text-center transition cursor-pointer ${
+              dragActive
+                ? "border-primary bg-primary/5"
+                : "border-muted-foreground/20 hover:border-primary/50"
+            }`}
+          >
             <input
               type="file"
               accept="image/*"
