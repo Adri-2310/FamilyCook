@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "prisma:seed": "prisma db seed",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "promote-admin": "ts-node scripts/promote-admin.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",
