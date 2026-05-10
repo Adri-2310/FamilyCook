@@ -100,6 +100,7 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
   );
 
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const handleInputChange = (
     e: React.ChangeEvent<
@@ -149,6 +150,37 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
 
   const removeStep = (index: number) => {
     setSteps(steps.filter((_, i) => i !== index));
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (response.ok) {
+        const { url } = await response.json();
+        setFormData((prev) => ({
+          ...prev,
+          coverImageUrl: url,
+        }));
+      } else {
+        alert("Erreur lors de l'upload de l'image");
+      }
+    } catch (error) {
+      console.error("Erreur:", error);
+      alert("Erreur lors de l'upload");
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -221,20 +253,38 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
 
         <div>
           <label className="block text-sm font-medium mb-2">
-            URL image de couverture
+            Image de couverture
           </label>
-          <Input
-            type="url"
-            name="coverImageUrl"
-            value={formData.coverImageUrl}
-            onChange={handleInputChange}
-            placeholder="https://..."
-          />
+          <div className="border-2 border-dashed border-muted-foreground/20 rounded-lg p-6 text-center hover:border-primary/50 transition cursor-pointer">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              disabled={uploading}
+              className="hidden"
+              id="image-upload"
+            />
+            <label
+              htmlFor="image-upload"
+              className="cursor-pointer block"
+            >
+              {uploading ? (
+                <p className="text-sm text-muted-foreground">Upload en cours...</p>
+              ) : formData.coverImageUrl ? (
+                <p className="text-sm text-green-600">✓ Image uploadée</p>
+              ) : (
+                <>
+                  <p className="text-sm font-medium mb-1">📷 Clique pour ajouter une image</p>
+                  <p className="text-xs text-muted-foreground">ou glisse-dépose une image (max 5MB)</p>
+                </>
+              )}
+            </label>
+          </div>
           {formData.coverImageUrl && (
             <img
               src={formData.coverImageUrl}
               alt="Aperçu"
-              className="mt-2 h-64 w-full object-cover rounded"
+              className="mt-4 h-64 w-full object-cover rounded"
             />
           )}
         </div>
