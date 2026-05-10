@@ -11,14 +11,9 @@ export default function NotFound() {
           Désolé, la page que vous recherchez n'existe pas ou a été supprimée.
         </p>
 
-        <div className="flex gap-4 justify-center">
+        <div className="flex justify-center">
           <Link href="/">
             <Button size="lg">🏠 Accueil</Button>
-          </Link>
-          <Link href="/recipe/shared">
-            <Button variant="outline" size="lg">
-              🍽️ Explorer les recettes
-            </Button>
           </Link>
         </div>
 

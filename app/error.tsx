@@ -27,11 +27,8 @@ export default function Error({
           dans quelques instants.
         </p>
 
-        <div className="flex gap-4 justify-center">
-          <Button size="lg" onClick={() => reset()}>
-            🔄 Réessayer
-          </Button>
-          <Button variant="outline" size="lg" onClick={() => window.location.href = "/"}>
+        <div className="flex justify-center">
+          <Button size="lg" onClick={() => window.location.href = "/"}>
             🏠 Accueil
           </Button>
         </div>
