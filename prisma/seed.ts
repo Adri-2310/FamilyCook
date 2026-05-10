@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Category, Difficulty, Visibility } from "@prisma/client";
 import * as bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
@@ -36,62 +36,57 @@ async function main() {
 
   // Create demo recipes
   const recipeIds: string[] = [];
-  const recipeDataList = [
+
+  const recipes = [
     {
       title: "Pâtes Carbonara",
       description: "Les vraies pâtes à la carbonara, recette italienne authentique",
       coverImageUrl: "https://via.placeholder.com/800x600?text=Carbonara",
-      additionalImages: [],
-      category: "MAIN",
+      category: "MAIN" as Category,
       prepTime: 10,
       cookTime: 15,
-      difficulty: "EASY",
+      difficulty: "EASY" as Difficulty,
       baseServings: 4,
-      visibility: "PUBLIC",
-      userId: user.id,
+      visibility: "PUBLIC" as Visibility,
     },
     {
       title: "Tarte Tatin",
       description: "Dessert classique français avec pommes caramélisées",
       coverImageUrl: "https://via.placeholder.com/800x600?text=Tarte+Tatin",
-      additionalImages: [],
-      category: "DESSERT",
+      category: "DESSERT" as Category,
       prepTime: 20,
       cookTime: 40,
-      difficulty: "MEDIUM",
+      difficulty: "MEDIUM" as Difficulty,
       baseServings: 6,
-      visibility: "PUBLIC",
-      userId: user.id,
+      visibility: "PUBLIC" as Visibility,
     },
     {
       title: "Bouillabaisse",
       description: "Soupe de poisson provençale riche et savoureuse",
       coverImageUrl: "https://via.placeholder.com/800x600?text=Bouillabaisse",
-      additionalImages: [],
-      category: "MAIN",
+      category: "MAIN" as Category,
       prepTime: 30,
       cookTime: 45,
-      difficulty: "HARD",
+      difficulty: "HARD" as Difficulty,
       baseServings: 6,
-      visibility: "PUBLIC",
-      userId: user.id,
+      visibility: "PUBLIC" as Visibility,
     },
   ];
 
-  for (const recipeData of recipeDataList) {
+  for (const recipeData of recipes) {
     const recipe = await prisma.recipe.create({
       data: {
         title: recipeData.title,
         description: recipeData.description,
         coverImageUrl: recipeData.coverImageUrl,
-        additionalImages: recipeData.additionalImages,
+        additionalImages: [],
         category: recipeData.category,
         prepTime: recipeData.prepTime,
         cookTime: recipeData.cookTime,
         difficulty: recipeData.difficulty,
         baseServings: recipeData.baseServings,
         visibility: recipeData.visibility,
-        userId: recipeData.userId,
+        userId: user.id,
       },
     });
 
