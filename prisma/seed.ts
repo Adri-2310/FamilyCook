@@ -21,17 +21,6 @@ async function main() {
       active: true,
     },
   });
-
-  // Create credential account for admin
-  await prisma.account.create({
-    data: {
-      userId: admin.id,
-      type: "credential",
-      provider: "credential",
-      providerAccountId: admin.email,
-      password: adminPassword,
-    },
-  });
   console.log("✓ Admin user created");
 
   // Create a regular user
@@ -44,17 +33,6 @@ async function main() {
       password: userPassword,
       role: "USER",
       active: true,
-    },
-  });
-
-  // Create credential account for regular user
-  await prisma.account.create({
-    data: {
-      userId: user.id,
-      type: "credential",
-      provider: "credential",
-      providerAccountId: user.email,
-      password: userPassword,
     },
   });
   console.log("✓ Regular user created");
