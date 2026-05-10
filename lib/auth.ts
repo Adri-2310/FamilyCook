@@ -31,6 +31,14 @@ export const auth = betterAuth({
       enabled: true,
       maxAge: 5 * 60, // 5 minutes cache
     },
+    cookie: {
+      attributes: {
+        httpOnly: true,
+        path: "/",
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+      },
+    },
   },
 
   // Add custom fields to user (role will be included in session automatically)
