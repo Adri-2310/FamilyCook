@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { RecipeSearchFilters } from "@/components/recipes/recipe-search-filters";
+import { RecipeCardClient } from "@/components/recipes/recipe-card-client";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { db } from "@/lib/db";
 
 interface SearchResult {
   recipes: any[];
@@ -54,6 +58,19 @@ export default async function SharedRecipesPage({
   const result = await getRecipes(params);
   const page = parseInt((params.page as string) || "1");
 
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  let favoriteIds: string[] = [];
+  if (session?.user) {
+    const favorites = await db.favorite.findMany({
+      where: { userId: session.user.id },
+      select: { recipeId: true },
+    });
+    favoriteIds = favorites.map((f) => f.recipeId);
+  }
+
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="mb-12">
@@ -81,48 +98,12 @@ export default async function SharedRecipesPage({
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
               {result.recipes.map((recipe) => (
-                <Link
+                <RecipeCardClient
                   key={recipe.id}
+                  recipe={recipe}
                   href={`/recipe/shared/show/${recipe.id}`}
-                  className="group"
-                >
-                  <Card className="overflow-hidden h-full hover:shadow-lg transition-shadow">
-                    <div className="relative h-48 bg-muted overflow-hidden">
-                      {recipe.coverImageUrl && (
-                        <img
-                          src={recipe.coverImageUrl}
-                          alt={recipe.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                        />
-                      )}
-                    </div>
-                    <div className="p-4">
-                      <h3 className="font-semibold text-lg mb-1 line-clamp-2">
-                        {recipe.title}
-                      </h3>
-                      <p className="text-sm text-muted-foreground mb-2">
-                        par {recipe.user.name || recipe.user.email}
-                      </p>
-                      <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                        {recipe.description}
-                      </p>
-                      <div className="flex items-center justify-between text-sm mb-2">
-                        <span className="text-muted-foreground">
-                          ⏱ {recipe.prepTime + (recipe.cookTime || 0)}min
-                        </span>
-                        <span className="text-muted-foreground">
-                          👥 {recipe.baseServings}
-                        </span>
-                      </div>
-                      {recipe.favoriteCount > 0 && (
-                        <div className="text-xs text-muted-foreground">
-                          ❤️ {recipe.favoriteCount} like
-                          {recipe.favoriteCount !== 1 ? "s" : ""}
-                        </div>
-                      )}
-                    </div>
-                  </Card>
-                </Link>
+                  isFavorite={favoriteIds.includes(recipe.id)}
+                />
               ))}
             </div>
 

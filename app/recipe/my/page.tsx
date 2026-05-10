@@ -4,7 +4,9 @@ import { headers } from "next/headers";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { RecipeSearchFilters } from "@/components/recipes/recipe-search-filters";
+import { RecipeCardClient } from "@/components/recipes/recipe-card-client";
 import { auth } from "@/lib/auth";
+import { db } from "@/lib/db";
 
 interface SearchResult {
   recipes: any[];
@@ -108,42 +110,16 @@ export default async function MyRecipesPage({
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {result.recipes.map((recipe) => (
-                <Link
-                  key={recipe.id}
-                  href={`/recipe/my/show/${recipe.id}`}
-                  className="group"
-                >
-                  <Card className="overflow-hidden h-full hover:shadow-lg transition-shadow">
-                    <div className="relative h-48 bg-muted overflow-hidden">
-                      {recipe.coverImageUrl && (
-                        <img
-                          src={recipe.coverImageUrl}
-                          alt={recipe.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                        />
-                      )}
-                      <div className="absolute top-2 right-2 bg-background/80 px-2 py-1 rounded text-sm">
-                        {recipe.visibility === "PUBLIC" ? "Public" : "Privé"}
-                      </div>
-                    </div>
-                    <div className="p-4">
-                      <h3 className="font-semibold text-lg mb-2 line-clamp-2">
-                        {recipe.title}
-                      </h3>
-                      <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                        {recipe.description}
-                      </p>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">
-                          ⏱ {recipe.prepTime + (recipe.cookTime || 0)}min
-                        </span>
-                        <span className="text-muted-foreground">
-                          👥 {recipe.baseServings}
-                        </span>
-                      </div>
-                    </div>
-                  </Card>
-                </Link>
+                <div key={recipe.id} className="relative">
+                  <RecipeCardClient
+                    recipe={recipe}
+                    href={`/recipe/my/show/${recipe.id}`}
+                    isFavorite={false}
+                  />
+                  <div className="absolute top-2 right-2 bg-background/80 px-2 py-1 rounded text-sm z-10">
+                    {recipe.visibility === "PUBLIC" ? "Public" : "Privé"}
+                  </div>
+                </div>
               ))}
             </div>
 
