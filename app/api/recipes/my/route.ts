@@ -22,35 +22,40 @@ export async function GET(request: Request) {
   const limit = 12;
 
   try {
-    // Construire les filtres
-    const where: Prisma.RecipeWhereInput = {
-      userId: session.user.id,
-    };
+    // Construire les filtres avec AND pour combiner correctement
+    const conditions: Prisma.RecipeWhereInput[] = [
+      { userId: session.user.id },
+    ];
 
     // Filtre recherche
     if (search.trim()) {
-      where.OR = [
-        { title: { contains: search, mode: "insensitive" } },
-        { description: { contains: search, mode: "insensitive" } },
-        {
-          ingredients: {
-            some: {
-              name: { contains: search, mode: "insensitive" },
+      conditions.push({
+        OR: [
+          { title: { contains: search, mode: "insensitive" } },
+          { description: { contains: search, mode: "insensitive" } },
+          {
+            ingredients: {
+              some: {
+                name: { contains: search, mode: "insensitive" },
+              },
             },
           },
-        },
-      ];
+        ],
+      });
     }
 
     // Filtre catégorie
     if (category && category !== "ALL") {
-      where.category = category as any;
+      conditions.push({ category: category as any });
     }
 
     // Filtre difficulté
     if (difficulty && difficulty !== "ALL") {
-      where.difficulty = difficulty as any;
+      conditions.push({ difficulty: difficulty as any });
     }
+
+    const where: Prisma.RecipeWhereInput =
+      conditions.length === 1 ? conditions[0] : { AND: conditions };
 
     // Récupérer le total
     const total = await db.recipe.count({ where });
