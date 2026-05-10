@@ -1,74 +1,22 @@
 import { PrismaClient, Category, Difficulty, Visibility } from "@prisma/client";
-import { scryptSync, randomBytes } from "crypto";
 import * as dotenv from "dotenv";
 
 dotenv.config({ path: ".env.local" });
 
 const prisma = new PrismaClient();
 
-// Fonction de hash compatible avec Better Auth (format: salt:hash)
-function hashPassword(password: string): string {
-  const salt = randomBytes(16);
-  const derivedKey = scryptSync(password, salt, 64);
-  return `${salt.toString("hex")}:${derivedKey.toString("hex")}`;
-}
-
 async function main() {
   console.log("🌱 Seeding database...");
 
-  // Create or update admin user with Better Auth account
-  const adminPassword = hashPassword("Ma161123@#");
-  const admin = await prisma.user.upsert({
-    where: { email: "adrien@hotmail.be" },
-    update: {
-      name: "Adrien Mertens",
-      emailVerified: true,
-      role: "ADMIN",
-      active: true,
-    },
-    create: {
-      name: "Adrien Mertens",
-      email: "adrien@hotmail.be",
-      emailVerified: true,
-      role: "ADMIN",
-      active: true,
-      accounts: {
-        create: {
-          accountId: "adrien@hotmail.be",
-          providerId: "credential",
-          password: adminPassword,
-        },
-      },
-    },
-  });
-  console.log("✓ Admin user ready (adrien@hotmail.be)");
+  // Get the first user (if any) for demo recipes
+  let testUser = await prisma.user.findFirst();
 
-  // Create or update regular user with Better Auth account
-  const userPassword = hashPassword("User123!@#");
-  const user = await prisma.user.upsert({
-    where: { email: "jean@example.com" },
-    update: {
-      name: "Jean Dupont",
-      emailVerified: true,
-      role: "USER",
-      active: true,
-    },
-    create: {
-      name: "Jean Dupont",
-      email: "jean@example.com",
-      emailVerified: true,
-      role: "USER",
-      active: true,
-      accounts: {
-        create: {
-          accountId: "jean@example.com",
-          providerId: "credential",
-          password: userPassword,
-        },
-      },
-    },
-  });
-  console.log("✓ Regular user ready");
+  if (!testUser) {
+    console.log("⚠️  Aucun utilisateur trouvé. Créez un compte d'abord via l'interface pour les recettes de démo.");
+    return;
+  }
+
+  console.log(`✓ Utilisation de l'utilisateur: ${testUser.name} (${testUser.email})`);
 
   // Create demo recipes
   const recipeIds: string[] = [];
@@ -122,7 +70,7 @@ async function main() {
         difficulty: recipeData.difficulty,
         baseServings: recipeData.baseServings,
         visibility: recipeData.visibility,
-        userId: user.id,
+        userId: testUser.id,
       },
     });
 
@@ -194,7 +142,7 @@ async function main() {
     console.log(`✓ Recipe created: ${recipe.title}`);
   }
 
-  // Create a private recipe for the admin
+  // Create a private recipe for the test user
   const privateRecipe = await prisma.recipe.create({
     data: {
       title: "Recette Secrète de Famille",
@@ -207,7 +155,7 @@ async function main() {
       difficulty: "MEDIUM",
       baseServings: 4,
       visibility: "PRIVATE",
-      userId: admin.id,
+      userId: testUser.id,
     },
   });
   console.log("✓ Private recipe created");
@@ -216,7 +164,7 @@ async function main() {
   if (recipeIds.length > 0) {
     await prisma.favorite.create({
       data: {
-        userId: user.id,
+        userId: testUser.id,
         recipeId: recipeIds[0],
       },
     });
