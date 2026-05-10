@@ -98,7 +98,7 @@ export async function GET(request: Request) {
       totalPages: Math.ceil(total / limit),
     });
   } catch (error) {
-    console.error("Erreur recherche:", error);
+
     return Response.json(
       { error: "Erreur lors de la recherche" },
       { status: 500 }

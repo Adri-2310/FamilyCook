@@ -63,7 +63,7 @@ async function getFavorites(
       totalPages: Math.ceil(total / limit),
     };
   } catch (error) {
-    console.error("Erreur:", error);
+
     return { recipes: [], total: 0, page: 1, totalPages: 0 };
   }
 }

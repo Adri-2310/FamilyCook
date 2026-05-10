@@ -61,7 +61,7 @@ export default function EditRecipePage() {
           router.push("/recipe/my");
         }
       } catch (error) {
-        console.error("Erreur:", error);
+
         router.push("/recipe/my");
       } finally {
         setLoading(false);

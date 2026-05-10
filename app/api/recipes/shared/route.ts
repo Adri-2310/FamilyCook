@@ -31,7 +31,7 @@ export async function GET() {
 
     return Response.json(recipes);
   } catch (error) {
-    console.error("Erreur:", error);
+
     return Response.json(
       { error: "Erreur lors du chargement des recettes" },
       { status: 500 }

@@ -44,7 +44,7 @@ async function getRecipes(
     }
     return { recipes: [], total: 0, page: 1, totalPages: 0 };
   } catch (error) {
-    console.error("Erreur:", error);
+
     return { recipes: [], total: 0, page: 1, totalPages: 0 };
   }
 }
