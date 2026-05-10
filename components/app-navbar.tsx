@@ -17,10 +17,13 @@ export function AppNavbar() {
   return (
     <header className="border-b sticky top-0 z-50 bg-background">
       <nav className="container mx-auto px-4 py-4 flex items-center justify-between">
-        <Link href="/user/recipes" className="flex items-center gap-2">
+        <Link href="/user/dashboard" className="flex items-center gap-2">
           <div className="text-2xl font-bold">🍳 FamilyCook</div>
         </Link>
         <div className="flex items-center gap-6">
+          <Link href="/user/dashboard" className="text-sm hover:text-primary transition">
+            Tableau de bord
+          </Link>
           <Link href="/user/recipes" className="text-sm hover:text-primary transition">
             Recettes
           </Link>

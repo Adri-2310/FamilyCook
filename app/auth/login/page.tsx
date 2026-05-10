@@ -28,7 +28,7 @@ export default function LoginPage() {
         },
         {
           onSuccess: () => {
-            router.push("/user/recipes");
+            router.push("/user/dashboard");
           },
           onError: (ctx) => {
             setError(ctx.error.message || "Erreur de connexion");
