@@ -6,11 +6,11 @@ dotenv.config({ path: ".env.local" });
 
 const prisma = new PrismaClient();
 
-// Fonction de hash compatible avec Better Auth
+// Fonction de hash compatible avec Better Auth (format: salt:hash)
 function hashPassword(password: string): string {
   const salt = randomBytes(16);
   const derivedKey = scryptSync(password, salt, 64);
-  return `${salt.toString("hex")}.${derivedKey.toString("hex")}`;
+  return `${salt.toString("hex")}:${derivedKey.toString("hex")}`;
 }
 
 async function main() {
