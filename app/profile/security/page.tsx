@@ -32,7 +32,7 @@ export default function SecurityPage() {
     setSaving(true);
     try {
       // Implement password change
-    } catch (error) {
+    } catch {
       alert("Erreur lors de la modification du mot de passe");
     } finally {
       setSaving(false);

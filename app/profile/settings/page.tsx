@@ -40,7 +40,7 @@ export default function SettingsPage() {
       } else {
         toastError("Erreur lors de la mise à jour");
       }
-    } catch (error) {
+    } catch {
       toastError("Erreur lors de la mise à jour");
     } finally {
       setSaving(false);
@@ -60,7 +60,7 @@ export default function SettingsPage() {
       } else {
         toastError("Erreur lors de la suppression du compte");
       }
-    } catch (error) {
+    } catch {
       toastError("Erreur lors de la suppression du compte");
     }
   };

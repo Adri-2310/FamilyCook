@@ -34,7 +34,7 @@ export async function GET(request: Request) {
       recipeCount,
       favoriteCount,
     });
-  } catch (error) {
+  } catch {
     return Response.json(
       { error: "Erreur lors du chargement du profil" },
       { status: 500 }
@@ -65,7 +65,7 @@ export async function PATCH(request: Request) {
       name: updated.name,
       email: updated.email,
     });
-  } catch (error) {
+  } catch {
     return Response.json(
       { error: "Erreur lors de la mise à jour du profil" },
       { status: 500 }
@@ -91,7 +91,7 @@ export async function DELETE(request: Request) {
     await db.user.delete({ where: { id: session.user.id } });
 
     return Response.json({ success: true });
-  } catch (error) {
+  } catch {
     return Response.json(
       { error: "Erreur lors de la suppression du compte" },
       { status: 500 }

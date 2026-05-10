@@ -20,6 +20,7 @@ export default function ProfilePage() {
   const { data: session, isPending } = useSession();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     if (isPending) return;
@@ -34,9 +35,11 @@ export default function ProfilePage() {
         if (response.ok) {
           const data = await response.json();
           setProfile(data);
+        } else {
+          setError(true);
         }
       } catch (error) {
-        console.error(error);
+        setError(true);
       } finally {
         setLoading(false);
       }
@@ -45,8 +48,12 @@ export default function ProfilePage() {
     fetchProfile();
   }, [session, router, isPending]);
 
-  if (loading || !profile) {
+  if (loading) {
     return <div className="text-center text-muted-foreground">Chargement...</div>;
+  }
+
+  if (error || !profile) {
+    return <div className="text-center text-muted-foreground">Erreur lors du chargement du profil</div>;
   }
 
   return (
