@@ -58,6 +58,25 @@ const DIFFICULTIES = [
   { value: "HARD", label: "Difficile" },
 ];
 
+const UNITS = [
+  "g",
+  "kg",
+  "ml",
+  "l",
+  "cl",
+  "cuillère à café",
+  "cuillère à soupe",
+  "tasse",
+  "pincée",
+  "tranche",
+  "morceau",
+  "feuille",
+  "tête",
+  "gousse",
+  "pot",
+  "",
+];
+
 export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) {
   const router = useRouter();
   const [formData, setFormData] = useState({
@@ -215,7 +234,7 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
             <img
               src={formData.coverImageUrl}
               alt="Aperçu"
-              className="mt-2 h-32 w-full object-cover rounded"
+              className="mt-2 h-64 w-full object-cover rounded"
             />
           )}
         </div>
@@ -316,39 +335,57 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
         <h2 className="text-xl font-semibold">Ingrédients</h2>
         <div className="space-y-3">
           {ingredients.map((ingredient, index) => (
-            <div key={index} className="flex gap-2">
-              <Input
-                type="text"
-                placeholder="Nom de l'ingrédient"
-                value={ingredient.name}
-                onChange={(e) =>
-                  handleIngredientChange(index, "name", e.target.value)
-                }
-                className="flex-1"
-              />
-              <Input
-                type="number"
-                placeholder="Quantité"
-                value={ingredient.quantity}
-                onChange={(e) =>
-                  handleIngredientChange(index, "quantity", e.target.value)
-                }
-                className="w-24"
-                step="0.1"
-              />
-              <Input
-                type="text"
-                placeholder="Unité"
-                value={ingredient.unit}
-                onChange={(e) =>
-                  handleIngredientChange(index, "unit", e.target.value)
-                }
-                className="w-24"
-              />
+            <div key={index} className="flex gap-2 items-end">
+              <div className="flex-1">
+                <label className="text-xs text-muted-foreground mb-1 block">
+                  Ingrédient
+                </label>
+                <Input
+                  type="text"
+                  placeholder="Nom"
+                  value={ingredient.name}
+                  onChange={(e) =>
+                    handleIngredientChange(index, "name", e.target.value)
+                  }
+                />
+              </div>
+              <div className="w-24">
+                <label className="text-xs text-muted-foreground mb-1 block">
+                  Quantité
+                </label>
+                <Input
+                  type="number"
+                  placeholder="0"
+                  value={ingredient.quantity}
+                  onChange={(e) =>
+                    handleIngredientChange(index, "quantity", e.target.value)
+                  }
+                  step="0.1"
+                />
+              </div>
+              <div className="w-32">
+                <label className="text-xs text-muted-foreground mb-1 block">
+                  Unité
+                </label>
+                <select
+                  value={ingredient.unit}
+                  onChange={(e) =>
+                    handleIngredientChange(index, "unit", e.target.value)
+                  }
+                  className="w-full px-2 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                >
+                  {UNITS.map((unit) => (
+                    <option key={unit} value={unit}>
+                      {unit || "—"}
+                    </option>
+                  ))}
+                </select>
+              </div>
               {ingredients.length > 1 && (
                 <Button
                   type="button"
                   variant="ghost"
+                  size="sm"
                   onClick={() => removeIngredient(index)}
                 >
                   ✕
