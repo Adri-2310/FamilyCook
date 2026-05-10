@@ -4,6 +4,9 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import Image from "next/image";
 import { Clock, ChefHat } from "lucide-react";
+import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 export const metadata = {
   title: "FamilyCook - Partagez vos recettes en famille",
@@ -33,6 +36,19 @@ async function getPublicRecipes() {
 }
 
 export default async function HomePage() {
+  // Rediriger vers le dashboard si l'utilisateur est connecté
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (session?.user) {
+    if (session.user.role === "ADMIN") {
+      redirect("/admin/dashboard");
+    } else {
+      redirect("/user/dashboard");
+    }
+  }
+
   const recipes = await getPublicRecipes();
 
   return (
