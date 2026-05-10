@@ -71,7 +71,6 @@ export async function POST(request: Request) {
 
     return Response.json(recipe, { status: 201 });
   } catch (error) {
-    console.error("Erreur:", error);
     return Response.json(
       { error: "Erreur lors de la création" },
       { status: 500 }
@@ -162,7 +161,6 @@ export async function PUT(request: Request) {
 
     return Response.json(updated);
   } catch (error) {
-    console.error("Erreur:", error);
     return Response.json(
       { error: "Erreur lors de la mise à jour" },
       { status: 500 }

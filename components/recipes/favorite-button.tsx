@@ -3,6 +3,7 @@
 import { Heart } from "lucide-react";
 import { useState, useTransition } from "react";
 import { addFavorite, removeFavorite } from "@/actions/favorites";
+import { toastAddedToFavorites, toastRemovedFromFavorites, toastError } from "@/lib/toast";
 
 interface FavoriteButtonProps {
   recipeId: string;
@@ -26,13 +27,15 @@ export function FavoriteButton({
           await removeFavorite(recipeId);
           setIsFavorite(false);
           setCount((prev) => Math.max(0, prev - 1));
+          toastRemovedFromFavorites();
         } else {
           await addFavorite(recipeId);
           setIsFavorite(true);
           setCount((prev) => prev + 1);
+          toastAddedToFavorites();
         }
       } catch (error) {
-        console.error("Erreur favoris:", error);
+        toastError("Erreur lors de la mise à jour des favoris");
       }
     });
   };

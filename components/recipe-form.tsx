@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toastRecipeCreated, toastRecipeUpdated, toastError } from "@/lib/toast";
 
 interface Ingredient {
   name: string;
@@ -172,11 +173,10 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
         }));
       } else {
         const error = await response.json();
-        alert(`Erreur: ${error.error || "Erreur lors de l'upload de l'image"}`);
+        toastError(error.error || "Erreur lors de l'upload de l'image");
       }
     } catch (error) {
-      console.error("Erreur:", error);
-      alert("Erreur lors de l'upload");
+      toastError("Erreur lors de l'upload");
     } finally {
       setUploading(false);
     }
@@ -235,13 +235,13 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
 
       if (response.ok) {
         const recipe = await response.json();
+        isEditing ? toastRecipeUpdated() : toastRecipeCreated();
         router.push(`/recipe/my/show/${recipe.id}`);
       } else {
-        alert("Erreur lors de la sauvegarde");
+        toastError("Erreur lors de la sauvegarde");
       }
     } catch (error) {
-      console.error("Erreur:", error);
-      alert("Erreur lors de la sauvegarde");
+      toastError("Erreur lors de la sauvegarde");
     } finally {
       setLoading(false);
     }

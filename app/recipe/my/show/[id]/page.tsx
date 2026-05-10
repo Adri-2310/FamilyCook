@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ServingsAdjuster } from "@/components/recipes/servings-adjuster";
 import { IngredientList } from "@/components/recipes/ingredient-list";
+import { toastRecipeDeleted, toastError } from "@/lib/toast";
 import { useServings } from "@/hooks/use-servings";
 
 interface Recipe {
@@ -95,12 +96,13 @@ export default function RecipeShowPage() {
       });
 
       if (response.ok) {
+        toastRecipeDeleted();
         router.push("/recipe/my");
       } else {
-        alert("Erreur lors de la suppression");
+        toastError("Erreur lors de la suppression");
       }
     } catch (error) {
-      alert("Erreur lors de la suppression");
+      toastError("Erreur lors de la suppression");
     } finally {
       setDeleting(false);
     }
