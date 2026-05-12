@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import bcrypt from "bcrypt";
+import { scrypt, randomBytes } from "crypto";
+import { promisify } from "util";
 
 const resetPasswordSchema = z.object({
   token: z.string().min(1),
@@ -48,8 +49,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Hash new password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // Hash new password using scrypt (same as Better Auth)
+    const scryptAsync = promisify(scrypt);
+    const salt = randomBytes(16);
+    const derivedKey = await scryptAsync(password, salt, 64);
+    const hashedPassword = `${salt.toString("hex")}.${(derivedKey as Buffer).toString("hex")}`;
 
     // Find or create account with email/password provider
     let account = await prisma.account.findFirst({
