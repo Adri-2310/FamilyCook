@@ -11,7 +11,10 @@
       "PowerShell($env:DATABASE_URL=\"postgresql://neondb_owner:npg_nMop4Qju8PCv@ep-proud-cloud-albogj46-pooler.c-3.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require\"; cd 'C:\\\\Users\\\\warse\\\\Documents\\\\myCode\\\\web\\\\FamilyCook'; npx prisma migrate deploy)",
       "PowerShell($env:DATABASE_URL=\"postgresql://neondb_owner:npg_nMop4Qju8PCv@ep-proud-cloud-albogj46-pooler.c-3.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require\"; cd 'C:\\\\Users\\\\warse\\\\Documents\\\\myCode\\\\web\\\\FamilyCook'; npx prisma generate)",
       "WebFetch(domain:better-auth.com)",
-      "Bash(xargs sed -i 's/^[[:space:]]*console\\\\.error\\([^\\)]*\\);[[:space:]]*$//')"
+      "Bash(xargs sed -i 's/^[[:space:]]*console\\\\.error\\([^\\)]*\\);[[:space:]]*$//')",
+      "PowerShell(Stop-Process *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\User\\\\Documents\\\\myCode\\\\next\\\\FamilyCook\\\\design-docs\" -Filter \"*.md\")",
+      "Bash(Sort-Object Name)"
     ]
   }
 }
