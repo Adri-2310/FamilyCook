@@ -1,29 +1,28 @@
 # 📋 FamilyCook - TODO de Développement
 
-**État Global**: ~40% implémenté | **À faire**: 31h environ  
+**État Global**: ~50% implémenté | **À faire**: ~24h environ  
 **Mise à jour**: 2026-05-12
 
 ---
 
-## 🔴 PHASE 1: Foundation (Critère de déverrouillage pour tout le reste)
+## ✅ PHASE 1: Foundation (TERMINÉE)
 
 ### Base de Données & Schéma
 
-- [ ] **Ajouter isDraft à Recipe model**
+- [x] **Ajouter isDraft à Recipe model**
   - Champ: `isDraft Boolean @default(false)`
   - Indices de perf
-  - Estimation: 30 min
+  - ✅ COMPLÉTÉ
   
-- [ ] **Créer Message model complet**
+- [x] **Créer Message model complet**
   - id, email, name, subject, message, type (enum), status (enum), ipAddress, userAgent, timestamps
-  - Enums: `ContactType` (BUG, FEEDBACK, QUESTION), `MessageStatus` (PENDING, RESOLVED)
-  - Estimation: 30 min
+  - Enums: `ContactType` (BUG, FEEDBACK, QUESTION), `MessageStatus` (NEW, VIEWED, RESOLVED)
+  - ✅ COMPLÉTÉ
 
-- [ ] **Migrer Prisma**
-  - Commande: `npx prisma migrate dev --name add_drafts_and_messages`
-  - Tester dans Prisma Studio
-  - Vérifier la DB
-  - Estimation: 30 min
+- [x] **Migrer Prisma**
+  - Migration unique: `20260512125318_initial_schema`
+  - Schéma complet et testé
+  - ✅ COMPLÉTÉ
 
 ---
 
@@ -48,14 +47,13 @@
 
 ### Pages Publiques
 
-- [ ] **Page `/contact` - Formulaire public**
+- [x] **Page `/contact` - Formulaire public** ✅
   - Champs: nom, email, type (select), message
   - Honeypot field (caché)
   - Validation client (RHF + Zod)
   - Afficher numéro de référence après soumission
-  - Styling responsive
-  - Tester sur mobile/desktop
-  - Estimation: 3h
+  - Styling responsive + notifications Sonner
+  - ✅ COMPLÉTÉ (testé et fonctionnel)
 
 - [ ] **Page `/user/profile/[userId]` - Profil public**
   - Récupérer user par ID via API
@@ -81,16 +79,15 @@
 
 ### Endpoints Critiques
 
-- [ ] **POST `/api/contact` - Soumettre formulaire**
+- [x] **POST `/api/contact` - Soumettre formulaire** ✅
   - Validation Zod (name, email, type, message)
   - Honeypot check
   - Rate limiting par IP (5/jour)
-  - Générer numéro de référence
+  - Générer numéro de référence: MSG-YYYYMMDD-XXXXX
   - Sauvegarder en DB (Message model)
-  - Envoyer email admin
   - Retourner {success, refNumber}
   - Error handling (400, 429, 500)
-  - Estimation: 2h
+  - ✅ COMPLÉTÉ (testé et fonctionnel)
 
 - [ ] **POST/DELETE `/api/recipes/[id]/favorite`**
   - POST: Ajouter aux favoris
