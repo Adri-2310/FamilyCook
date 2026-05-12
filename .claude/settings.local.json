@@ -14,7 +14,8 @@
       "Bash(xargs sed -i 's/^[[:space:]]*console\\\\.error\\([^\\)]*\\);[[:space:]]*$//')",
       "PowerShell(Stop-Process *)",
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\User\\\\Documents\\\\myCode\\\\next\\\\FamilyCook\\\\design-docs\" -Filter \"*.md\")",
-      "Bash(Sort-Object Name)"
+      "Bash(Sort-Object Name)",
+      "Bash(xargs wc -l)"
     ]
   }
 }

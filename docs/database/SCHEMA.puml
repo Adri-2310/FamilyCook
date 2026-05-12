@@ -1,0 +1,296 @@
+@startuml FamilyCook Database Schema
+!define BGCOLOR #F8F9FA
+!define SECONDARY #E8ECEF
+!define PRIMARY #2E7D32
+
+skinparam backgroundColor BGCOLOR
+skinparam classBackgroundColor BGCOLOR
+skinparam classBorderColor PRIMARY
+skinparam classArrowColor PRIMARY
+skinparam noteBkgColor #FFF9E6
+
+' =============================================================================
+' ENUMS
+' =============================================================================
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Language {
+  FR
+  EN
+}
+
+enum Category {
+  APPETIZER
+  MAIN
+  DESSERT
+  BREAKFAST
+  SIDE
+  SOUP
+  SALAD
+  SAUCE
+  BREAD
+  DRINK
+  OTHER
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum Visibility {
+  PUBLIC
+  PRIVATE
+}
+
+enum Unit {
+  G, KG, OZ, LB
+  ML, CL, L
+  TSP, TBSP, CUP
+  PIECE, PINCH, DASH, SLICE
+}
+
+enum ContactType {
+  BUG
+  FEEDBACK
+  QUESTION
+}
+
+enum MessageStatus {
+  NEW
+  VIEWED
+  RESOLVED
+}
+
+' =============================================================================
+' USER & AUTH (Better Auth)
+' =============================================================================
+
+class User {
+  id: String (PK)
+  --
+  name: String?
+  email: String (UNIQUE)
+  emailVerified: Boolean
+  image: String?
+  role: Role (default: USER)
+  active: Boolean
+  --
+  profilePublic: Boolean
+  language: Language
+  notificationsEnabled: Boolean
+  notificationSettings: JSON
+  --
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+class Session {
+  id: String (PK)
+  --
+  expiresAt: DateTime
+  token: String (UNIQUE)
+  ipAddress: String?
+  userAgent: String?
+  --
+  userId: String (FK)
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+class Account {
+  id: String (PK)
+  --
+  accountId: String
+  providerId: String
+  accessToken: String?
+  refreshToken: String?
+  password: String? (bcrypt)
+  --
+  userId: String (FK)
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+class Verification {
+  id: String (PK)
+  --
+  identifier: String
+  token: String (UNIQUE)
+  expires: DateTime
+  --
+  userId: String (FK)
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+' =============================================================================
+' RECIPES
+' =============================================================================
+
+class Recipe {
+  id: String (PK)
+  --
+  title: String
+  description: String?
+  coverImageUrl: String?
+  category: Category
+  difficulty: Difficulty
+  --
+  prepTime: Int
+  cookTime: Int?
+  baseServings: Int (default: 4)
+  --
+  isDraft: Boolean
+  visibility: Visibility
+  --
+  ratingAvg: Float?
+  ratingCount: Int
+  viewCount: Int
+  --
+  userId: String (FK)
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+class Ingredient {
+  id: String (PK)
+  --
+  name: String
+  quantity: Float
+  unit: Unit?
+  notes: String?
+  order: Int
+  --
+  recipeId: String (FK)
+}
+
+class Step {
+  id: String (PK)
+  --
+  content: String
+  imageUrl: String?
+  order: Int
+  --
+  recipeId: String (FK)
+}
+
+class Tag {
+  id: String (PK)
+  --
+  name: String (UNIQUE)
+}
+
+class RecipeTag {
+  recipeId: String (FK/PK)
+  tagId: String (FK/PK)
+}
+
+' =============================================================================
+' USER INTERACTIONS
+' =============================================================================
+
+class Favorite {
+  userId: String (FK/PK)
+  recipeId: String (FK/PK)
+  --
+  createdAt: DateTime
+}
+
+class Rating {
+  id: String (PK)
+  --
+  value: Int (1-5)
+  comment: String?
+  --
+  userId: String (FK)
+  recipeId: String (FK)
+  --
+  createdAt: DateTime
+  updatedAt: DateTime
+  @@unique([userId, recipeId])
+}
+
+' =============================================================================
+' CONTACT & MESSAGES
+' =============================================================================
+
+class Message {
+  id: String (PK)
+  --
+  referenceNumber: String (UNIQUE)
+  --
+  name: String
+  email: String
+  type: ContactType
+  subject: String?
+  body: String
+  --
+  status: MessageStatus
+  ipAddress: String?
+  userAgent: String?
+  consentEmail: Boolean
+  --
+  userId: String? (FK)
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+' =============================================================================
+' RELATIONSHIPS
+' =============================================================================
+
+User ||--o{ Recipe : creates
+User ||--o{ Session : has
+User ||--o{ Account : has
+User ||--o{ Verification : uses
+User ||--o{ Favorite : marks
+User ||--o{ Rating : gives
+User ||--o{ Message : sends
+
+Recipe ||--o{ Ingredient : contains
+Recipe ||--o{ Step : has
+Recipe ||--o{ Favorite : favorited_by
+Recipe ||--o{ Rating : rated_by
+Recipe }o--o{ Tag : tagged_with
+
+RecipeTag }o--|| Recipe : links
+RecipeTag }o--|| Tag : links
+
+' =============================================================================
+' NOTES
+' =============================================================================
+
+note right of User
+  Better Auth compatible
+  role: ADMIN for moderation
+  profilePublic: can be hidden
+  language: FR by default
+end note
+
+note right of Recipe
+  isDraft=true: invisible (brouillon)
+  isDraft=false: subject to visibility
+  viewCount: incremented on detail view
+  ratingAvg/ratingCount: denormalized (cached)
+end note
+
+note right of Rating
+  1 vote per (user, recipe)
+  value: 1-5 stars
+  Used to calculate ratingAvg on Recipe
+end note
+
+note right of Message
+  referenceNumber: MSG-YYYYMMDD-XXXXX
+  userId: optional (null if not connected)
+  onDelete: SetNull (msg survives user deletion)
+  status: NEW → VIEWED → RESOLVED
+end note
+
+@enduml

@@ -1,5 +1,9 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// =============================================================================
+// FamilyCook - Prisma Schema
+// =============================================================================
+// App: Plateforme de partage de recettes familiales
+// Stack: Next.js + Prisma + PostgreSQL (Neon) + Better Auth
+// =============================================================================
 
 generator client {
   provider = "prisma-client-js"
@@ -10,61 +14,126 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ============================================================================
+// =============================================================================
 // ENUMS
-// ============================================================================
+// =============================================================================
 
+// Rôle utilisateur dans l'application
 enum Role {
   USER
   ADMIN
 }
 
+// Langue d'affichage de l'interface
+enum Language {
+  FR
+  EN
+}
+
+// Catégorie d'une recette
 enum Category {
-  APPETIZER
-  MAIN
-  DESSERT
-  BREAKFAST
-  SAUCE
-  BREAD
-  DRINK
-  OTHER
+  APPETIZER  // Entrée
+  MAIN       // Plat principal
+  DESSERT    // Dessert
+  BREAKFAST  // Petit-déjeuner
+  SIDE       // Accompagnement
+  SOUP       // Soupe
+  SALAD      // Salade
+  SAUCE      // Sauce
+  BREAD      // Pain / Viennoiserie
+  DRINK      // Boisson
+  OTHER      // Autre
 }
 
+// Niveau de difficulté d'une recette
 enum Difficulty {
-  EASY
-  MEDIUM
-  HARD
+  EASY   // Facile
+  MEDIUM // Moyen
+  HARD   // Difficile
 }
 
+// Visibilité d'une recette (ignoré si isDraft = true)
 enum Visibility {
-  PUBLIC
-  PRIVATE
+  PUBLIC  // Visible par tous les utilisateurs connectés
+  PRIVATE // Visible uniquement par l'auteur
 }
 
-// ============================================================================
-// USER & AUTH
-// ============================================================================
+// Unité de mesure pour les ingrédients
+enum Unit {
+  // Masse
+  G     // Grammes
+  KG    // Kilogrammes
+  OZ    // Onces
+  LB    // Livres
+  // Volume
+  ML    // Millilitres
+  CL    // Centilitres
+  L     // Litres
+  TSP   // Cuillère à café
+  TBSP  // Cuillère à soupe
+  CUP   // Tasse
+  // Autres
+  PIECE // Pièce / unité
+  PINCH // Pincée
+  DASH  // Trait
+  SLICE // Tranche
+}
 
+// Type de message dans le formulaire de contact
+enum ContactType {
+  BUG       // Signalement de bug
+  FEEDBACK  // Retour / suggestion
+  QUESTION  // Question générale
+}
+
+// Statut d'un message de contact (workflow admin)
+enum MessageStatus {
+  NEW      // Nouveau, non lu
+  VIEWED   // Vu par l'admin
+  RESOLVED // Traité / résolu
+}
+
+// =============================================================================
+// USER & AUTH (Better Auth compatible)
+// =============================================================================
+
+// Utilisateur de l'application
 model User {
-  id            String    @id @default(cuid())
+  id            String   @id @default(cuid())
   name          String?
-  email         String    @unique
-  emailVerified Boolean   @default(false)
-  image         String?
-  role          Role      @default(USER)
-  active        Boolean   @default(true)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  email         String   @unique
+  emailVerified Boolean  @default(false)
+  image         String?                          // URL avatar (Vercel Blob ou Gravatar)
+  role          Role     @default(USER)
+  active        Boolean  @default(true)          // Soft-disable (futur)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  recipes    Recipe[]
-  favorites  Favorite[]
-  sessions   Session[]
-  accounts   Account[]
+  // Paramètres utilisateur
+  profilePublic        Boolean @default(false)   // Profil public visible par les autres users
+  language             Language @default(FR)     // Langue d'affichage de l'UI
+  notificationsEnabled Boolean @default(true)    // Interrupteur global notifications email
+
+  // Préférences de notifications (stockage flexible en JSON)
+  // Structure: { welcomeEmails: bool, weeklyRecap: bool, newRecipes: bool, suggestions: bool }
+  notificationSettings Json @default("{\"welcomeEmails\":true,\"weeklyRecap\":true,\"newRecipes\":false,\"suggestions\":false}")
+
+  // Relations
+  recipes       Recipe[]
+  favorites     Favorite[]
+  ratings       Rating[]
+  sessions      Session[]
+  accounts      Account[]
   verifications Verification[]
+  messages      Message[]
 
+  @@index([email])
+  @@index([role])
+  @@index([createdAt])
   @@map("users")
 }
 
+// Session active Better Auth (une par device)
 model Session {
   id        String   @id @default(cuid())
   expiresAt DateTime
@@ -77,13 +146,16 @@ model Session {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
+  @@index([expiresAt])
   @@map("sessions")
 }
 
+// Compte OAuth / email lié à un utilisateur (Better Auth)
 model Account {
   id                    String    @id @default(cuid())
   accountId             String
-  providerId            String
+  providerId            String                   // "email", "google", etc.
   userId                String
   user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   accessToken           String?
@@ -92,93 +164,124 @@ model Account {
   accessTokenExpiresAt  DateTime?
   refreshTokenExpiresAt DateTime?
   scope                 String?
-  password              String?
+  password              String?                  // Hash bcrypt pour email/password
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
+  @@index([userId])
+  @@index([providerId])
   @@map("accounts")
 }
 
+// Token de vérification (email, reset password — Better Auth)
 model Verification {
-  id        String   @id @default(cuid())
-  identifier String
-  token     String   @unique
-  expires   DateTime
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(cuid())
+  identifier String                             // Email ou userId concerné
+  token      String   @unique
+  expires    DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([identifier, token])
+  @@index([userId])
   @@map("verifications")
 }
 
-// ============================================================================
+// =============================================================================
 // RECIPES
-// ============================================================================
+// =============================================================================
 
+// Recette (brouillon ou publiée)
 model Recipe {
-  id               String      @id @default(cuid())
-  title            String
-  description      String
-  coverImageUrl    String
-  additionalImages String[]
-  category         Category
-  prepTime         Int
-  cookTime         Int?
-  difficulty       Difficulty
-  baseServings     Int
-  visibility       Visibility  @default(PRIVATE)
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
+  id            String     @id @default(cuid())
+  title         String                           // 3-255 caractères
+  description   String?                          // Description libre (max ~5000 chars)
+  coverImageUrl String?                          // URL image de couverture (Vercel Blob)
+  category      Category
+  difficulty    Difficulty
+  prepTime      Int                              // Temps de préparation en minutes
+  cookTime      Int?                             // Temps de cuisson en minutes (optionnel)
+  baseServings  Int        @default(4)           // Nombre de portions de base (pour le portioning)
 
+  // Statut et visibilité
+  isDraft    Boolean    @default(true)           // true = brouillon (non visible), false = finalisée
+  visibility Visibility @default(PRIVATE)        // PUBLIC ou PRIVATE (ignoré si isDraft = true)
+
+  // Statistiques dénormalisées (mises à jour lors des votes)
+  ratingAvg   Float? @default(0)                // Moyenne des notes (0.0 – 5.0), null = pas encore noté
+  ratingCount Int    @default(0)                // Nombre total d'évaluations
+  viewCount   Int    @default(0)                // Nombre de vues (incrémenté à chaque consultation)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Auteur (cascade: suppression user → suppression recettes)
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  // Relations enfants
   ingredients Ingredient[]
   steps       Step[]
   tags        RecipeTag[]
   favorites   Favorite[]
+  ratings     Rating[]
 
-  @@index([userId])
-  @@index([visibility])
+  // Index pour les requêtes courantes
+  @@index([userId])                              // Recettes d'un utilisateur
+  @@index([visibility, isDraft])                 // Feed public (visibility=PUBLIC AND isDraft=false)
+  @@index([category])                            // Filtre par catégorie
+  @@index([difficulty])                          // Filtre par difficulté
+  @@index([ratingAvg])                           // Tri par note
+  @@index([viewCount])                           // Tri par popularité
+  @@index([createdAt])                           // Tri par date
+  @@index([userId, isDraft])                     // Brouillons d'un utilisateur
   @@map("recipes")
 }
 
+// Ingrédient d'une recette
 model Ingredient {
-  id       String @id @default(cuid())
-  name     String
-  quantity Float
-  unit     String?
-  order    Int
+  id       String  @id @default(cuid())
+  name     String                               // Nom de l'ingrédient
+  quantity Float                                // Quantité (pour baseServings)
+  unit     Unit?                                // Unité de mesure (null = sans unité, ex: "1 oeuf")
+  notes    String?                              // Note complémentaire ("finement haché", etc.)
+  order    Int                                  // Position dans la liste (pour l'affichage ordonné)
 
   recipeId String
   recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 
+  @@index([recipeId])
   @@map("ingredients")
 }
 
+// Étape de préparation d'une recette
 model Step {
-  id      String @id @default(cuid())
-  content String
-  order   Int
+  id       String  @id @default(cuid())
+  content  String                               // Texte de l'étape (max ~5000 chars)
+  imageUrl String?                              // Image illustrative optionnelle
+  order    Int                                  // Numéro d'étape (pour l'affichage ordonné)
 
   recipeId String
   recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 
+  @@index([recipeId])
   @@map("steps")
 }
 
+// Tag (label) associable à une recette
 model Tag {
   id   String @id @default(cuid())
-  name String @unique
+  name String @unique                           // Slug normalisé (ex: "végétarien", "rapide")
 
   recipes RecipeTag[]
 
   @@map("tags")
 }
 
+// Table de jointure Recipe ↔ Tag (relation N:N)
 model RecipeTag {
   recipeId String
   recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
@@ -190,19 +293,83 @@ model RecipeTag {
   @@map("recipe_tags")
 }
 
-// ============================================================================
-// FAVORITES
-// ============================================================================
+// =============================================================================
+// INTERACTIONS UTILISATEURS
+// =============================================================================
 
+// Recette mise en favori par un utilisateur
 model Favorite {
   userId   String
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   recipeId String
-  recipe   Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 
-  @@id([userId, recipeId])
+  @@id([userId, recipeId])                      // Contrainte unique implicite
+  @@index([userId])                              // Favoris d'un utilisateur
+  @@index([recipeId])                            // Compteur de favoris d'une recette
   @@map("favorites")
+}
+
+// Note (1–5 étoiles) donnée par un utilisateur à une recette
+// Un utilisateur ne peut noter une recette qu'une seule fois (@@unique)
+model Rating {
+  id      String  @id @default(cuid())
+  value   Int                                    // Note entre 1 et 5
+  comment String?                                // Commentaire optionnel (max ~5000 chars)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  recipeId String
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, recipeId])                   // Un vote par (user, recette)
+  @@index([userId])
+  @@index([recipeId])
+  @@map("ratings")
+}
+
+// =============================================================================
+// CONTACT & MESSAGES ADMIN
+// =============================================================================
+
+// Message envoyé via le formulaire de contact public
+model Message {
+  id              String        @id @default(cuid())
+  referenceNumber String        @unique            // Format: MSG-YYYYMMDD-XXXXX (ex: MSG-20260512-00042)
+
+  // Informations de l'expéditeur
+  name  String
+  email String
+
+  // Contenu du message
+  type    ContactType
+  subject String?                                  // Objet optionnel (pré-rempli selon le type)
+  body    String                                   // Corps du message
+
+  // Métadonnées & sécurité
+  status       MessageStatus @default(NEW)
+  ipAddress    String?
+  userAgent    String?
+  consentEmail Boolean       @default(true)        // L'expéditeur accepte d'être recontacté
+
+  // Liaison optionnelle à un compte utilisateur (si connecté lors de l'envoi)
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])                                // Filtre admin par statut
+  @@index([type])                                  // Filtre admin par type
+  @@index([email])                                 // Recherche par email expéditeur
+  @@index([createdAt])                             // Tri chronologique
+  @@index([userId])                                // Messages liés à un utilisateur
+  @@map("messages")
 }
