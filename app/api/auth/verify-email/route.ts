@@ -32,14 +32,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if it's an email verification token (identifier starts with "email-verification-")
-    if (!verification.identifier.startsWith("email-verification-")) {
-      return NextResponse.json(
-        { error: "Type de token invalide" },
-        { status: 400 }
-      );
-    }
-
     // Mark email as verified
     await prisma.user.update({
       where: { id: verification.userId },
