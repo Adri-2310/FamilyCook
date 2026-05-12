@@ -43,7 +43,22 @@ export default function RegisterPage() {
           name,
         },
         {
-          onSuccess: () => {
+          onSuccess: async () => {
+            // Send verification email
+            try {
+              const response = await fetch("/api/auth/send-verification-email", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email }),
+              });
+
+              if (!response.ok) {
+                console.error("Failed to send verification email");
+              }
+            } catch (err) {
+              console.error("Error sending verification email:", err);
+            }
+
             setSubmitted(true);
             toast.success("Inscription réussie!", {
               description: "Un email de vérification a été envoyé.",
