@@ -17,6 +17,7 @@ async function sendVerificationEmail(
   user: { email: string; name?: string | null },
   url: string
 ) {
+  console.log("📧 Sending verification email to:", user.email);
   const emailContent = `
     <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px;">
       <h2>Bienvenue sur FamilyCook!</h2>
@@ -29,14 +30,15 @@ async function sendVerificationEmail(
   `;
 
   try {
-    await transporter.sendMail({
+    const result = await transporter.sendMail({
       from: process.env.EMAIL_FROM || "FamilyCook <noreply@familycook.app>",
       to: user.email,
       subject: "Vérifiez votre adresse email - FamilyCook",
       html: emailContent,
     });
+    console.log("✅ Verification email sent successfully:", result.response);
   } catch (error) {
-    console.error("Failed to send verification email:", error);
+    console.error("❌ Failed to send verification email:", error);
   }
 }
 
@@ -52,6 +54,7 @@ export const auth = betterAuth({
     enabled: true,
     requireEmailVerification: true,
     sendVerificationEmail: sendVerificationEmail,
+    sendOnSignUp: true,
   },
 
   // Google OAuth
