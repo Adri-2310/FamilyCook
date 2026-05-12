@@ -12,7 +12,7 @@ export const auth = betterAuth({
   // Enable email and password authentication
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: false,
+    requireEmailVerification: true,
   },
 
   // Google OAuth
