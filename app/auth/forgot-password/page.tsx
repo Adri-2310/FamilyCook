@@ -41,10 +41,11 @@ export default function ForgotPasswordPage() {
         throw new Error(errorData.error || "Erreur lors de l'envoi");
       }
 
+      const responseData = await response.json();
       setSubmitted(true);
       reset();
-      toast.success("Email envoyé!", {
-        description: "Vérifiez votre boîte email pour le lien de réinitialisation.",
+      toast.success("Vérifiez votre email", {
+        description: responseData.message,
       });
     } catch (error) {
       const errorMsg =
@@ -76,9 +77,9 @@ export default function ForgotPasswordPage() {
               </div>
             </div>
 
-            <h2 className="text-2xl font-bold mb-2">Email envoyé!</h2>
+            <h2 className="text-2xl font-bold mb-2">Vérifiez votre email</h2>
             <p className="text-muted-foreground mb-6">
-              Vérifiez votre boîte email. Vous devriez recevoir un lien pour
+              Si cet email existe dans notre système, vous recevrez un lien pour
               réinitialiser votre mot de passe dans quelques instants.
             </p>
 
