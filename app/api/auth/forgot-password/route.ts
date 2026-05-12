@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { sendEmail } from "@/lib/mailer";
 import { randomBytes } from "crypto";
+import nodemailer from "nodemailer";
 
 const forgotPasswordSchema = z.object({
   email: z.string().email(),
@@ -43,34 +43,34 @@ export async function POST(request: NextRequest) {
     // Build reset URL
     const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password/${token}`;
 
-    // Send email (using simple HTML for now)
-    await sendEmail({
+    // Send email
+    const emailContent = `
+      <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px;">
+        <h2>Réinitialiser votre mot de passe</h2>
+        <p>Bonjour ${user.name || "utilisateur"},</p>
+        <p>Nous avons reçu une demande de réinitialisation de votre mot de passe. Cliquez sur le lien ci-dessous pour continuer:</p>
+        <p><a href="${resetUrl}" style="color: #2E7D32; text-decoration: none; font-weight: bold;">Réinitialiser mon mot de passe</a></p>
+        <p style="font-size: 12px; color: #666;">Ou copiez ce lien dans votre navigateur:<br/>${resetUrl}</p>
+        <p style="font-size: 12px; color: #999;">Ce lien expire dans 1 heure. Si vous n'avez pas demandé cette réinitialisation, ignorez cet email.</p>
+      </div>
+    `;
+
+    // Send email using nodemailer
+    const transporter = nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_APP_PASSWORD,
+      },
+    });
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_FROM || "FamilyCook <noreply@familycook.app>",
       to: user.email,
       subject: "Réinitialiser votre mot de passe - FamilyCook",
-      react: (
-        <div style={{ fontFamily: "Arial, sans-serif", padding: "20px" }}>
-          <h2>Réinitialiser votre mot de passe</h2>
-          <p>Bonjour {user.name || "utilisateur"},</p>
-          <p>
-            Nous avons reçu une demande de réinitialisation de votre mot de passe.
-            Cliquez sur le lien ci-dessous pour continuer:
-          </p>
-          <p>
-            <a href={resetUrl} style={{ color: "#2E7D32", textDecoration: "none" }}>
-              Réinitialiser mon mot de passe
-            </a>
-          </p>
-          <p>
-            Ou copiez ce lien dans votre navigateur:
-            <br />
-            <code style={{ fontSize: "12px", color: "#666" }}>{resetUrl}</code>
-          </p>
-          <p style={{ fontSize: "12px", color: "#999" }}>
-            Ce lien expire dans 1 heure. Si vous n'avez pas demandé cette
-            réinitialisation, ignorez cet email.
-          </p>
-        </div>
-      ),
+      html: emailContent,
     });
 
     return NextResponse.json({
