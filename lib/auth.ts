@@ -1,6 +1,44 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "@better-auth/prisma-adapter";
 import { db } from "./db";
+import nodemailer from "nodemailer";
+
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_APP_PASSWORD,
+  },
+});
+
+async function sendVerificationEmail(
+  user: { email: string; name?: string | null },
+  url: string
+) {
+  const emailContent = `
+    <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px;">
+      <h2>Bienvenue sur FamilyCook!</h2>
+      <p>Bonjour ${user.name || "utilisateur"},</p>
+      <p>Pour finaliser votre inscription, veuillez confirmer votre adresse email en cliquant sur le lien ci-dessous:</p>
+      <p><a href="${url}" style="color: #2E7D32; text-decoration: none; font-weight: bold; padding: 10px 20px; background-color: #E8F5E9; display: inline-block; border-radius: 4px;">Vérifier mon email</a></p>
+      <p style="font-size: 12px; color: #666;">Ou copiez ce lien dans votre navigateur:<br/>${url}</p>
+      <p style="font-size: 12px; color: #999;">Ce lien expire dans 24 heures. Si vous n'avez pas créé ce compte, ignorez cet email.</p>
+    </div>
+  `;
+
+  try {
+    await transporter.sendMail({
+      from: process.env.EMAIL_FROM || "FamilyCook <noreply@familycook.app>",
+      to: user.email,
+      subject: "Vérifiez votre adresse email - FamilyCook",
+      html: emailContent,
+    });
+  } catch (error) {
+    console.error("Failed to send verification email:", error);
+  }
+}
 
 export const auth = betterAuth({
   database: prismaAdapter(db, { provider: "postgresql" }),
@@ -13,6 +51,7 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
+    sendVerificationEmail: sendVerificationEmail,
   },
 
   // Google OAuth
