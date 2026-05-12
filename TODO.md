@@ -1,6 +1,6 @@
 # 📋 FamilyCook - TODO de Développement
 
-**État Global**: ~60% implémenté | **À faire**: ~17h environ  
+**État Global**: ~65% implémenté | **À faire**: ~15h environ  
 **Mise à jour**: 2026-05-12
 
 ---
@@ -89,20 +89,21 @@
   - Error handling (400, 429, 500)
   - ✅ COMPLÉTÉ (testé et fonctionnel)
 
-- [ ] **POST/DELETE `/api/recipes/[id]/favorite`**
+- [x] **POST/DELETE `/api/recipes/[id]/favorite`** ✅
   - POST: Ajouter aux favoris
   - DELETE: Retirer des favoris
   - Auth check (protected)
   - Vérifier recipe exists
   - Retourner nombre de favoris
-  - Estimation: 1h
+  - ✅ COMPLÉTÉ
 
-- [ ] **GET/PUT/DELETE `/api/recipes/my/drafts`**
-  - GET: Récupérer brouillons (isDraft=true)
-  - PUT: Auto-save brouillon
-  - DELETE: Supprimer brouillon
-  - Auth check
-  - Estimation: 1h
+- [x] **GET/PUT/DELETE `/api/recipes/my/drafts`** ✅
+  - GET: Récupérer brouillons (isDraft=true) avec pagination
+  - PUT: Auto-save brouillon (champs partiels)
+  - DELETE: Supprimer brouillon + données liées
+  - Auth check (protected)
+  - Ownership check
+  - ✅ COMPLÉTÉ
 
 ### Endpoints Password Reset
 
