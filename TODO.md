@@ -1,6 +1,6 @@
 # 📋 FamilyCook - TODO de Développement
 
-**État Global**: ~50% implémenté | **À faire**: ~24h environ  
+**État Global**: ~60% implémenté | **À faire**: ~17h environ  
 **Mise à jour**: 2026-05-12
 
 ---
@@ -30,20 +30,20 @@
 
 ### Pages d'Authentification
 
-- [ ] **Page `/auth/forgot-password`**
+- [x] **Page `/auth/forgot-password`** ✅
   - Formulaire avec champ email
-  - Bouton "Envoyer lien de réinitialisation"
+  - Validation email Zod
   - Message de succès
-  - Validation avec Zod + React Hook Form
-  - Styling Tailwind
-  - Estimation: 1.5h
+  - Notifications Sonner
+  - ✅ COMPLÉTÉ
 
-- [ ] **Page `/auth/reset-password/[token]`**
+- [x] **Page `/auth/reset-password/[token]`** ✅
   - Récupérer token du URL
   - Formulaire: password + confirm password
-  - Validation mot de passe fort
+  - Validation password fort (min 8, majuscule, chiffre)
   - Redirection login après succès
-  - Estimation: 1.5h
+  - Notifications Sonner
+  - ✅ COMPLÉTÉ
 
 ### Pages Publiques
 
@@ -106,17 +106,19 @@
 
 ### Endpoints Password Reset
 
-- [ ] **POST `/api/auth/forgot-password`**
+- [x] **POST `/api/auth/forgot-password`** ✅
   - Valider email
-  - Générer token
-  - Envoyer email avec lien reset
-  - Estimation: 1h
+  - Générer token (expiration 1h)
+  - Sauvegarder dans Verification table
+  - Envoyer email avec lien reset (react-email + nodemailer)
+  - ✅ COMPLÉTÉ
 
-- [ ] **POST `/api/auth/reset-password`**
-  - Valider token
-  - Réinitialiser mot de passe
-  - Retour succès/erreur
-  - Estimation: 1h
+- [x] **POST `/api/auth/reset-password`** ✅
+  - Valider token et nouveau password
+  - Vérifier expiration token
+  - Hash password avec bcrypt
+  - Mettre à jour Account model
+  - ✅ COMPLÉTÉ
 
 ### API Profil Public & Admin
 
