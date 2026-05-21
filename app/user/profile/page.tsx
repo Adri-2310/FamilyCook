@@ -5,10 +5,13 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useSession } from "@/lib/auth-client";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function ProfilePage() {
-  const { data: session } = useSession();
+  const { data: session, refetch } = useSession();
   const [isEditing, setIsEditing] = useState(false);
+  const [name, setName] = useState(session?.user.name || "");
+  const [isSaving, setIsSaving] = useState(false);
 
   if (!session?.user) {
     return (
@@ -17,6 +20,35 @@ export default function ProfilePage() {
       </div>
     );
   }
+
+  const handleSave = async () => {
+    if (!name.trim()) {
+      toast.error("Le nom ne peut pas être vide");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const response = await fetch("/api/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Erreur lors de la sauvegarde");
+      }
+
+      await refetch();
+      setIsEditing(false);
+      toast.success("Profil mis à jour avec succès");
+    } catch (error) {
+      toast.error("Erreur lors de la sauvegarde du profil");
+      console.error(error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <div className="max-w-2xl">
@@ -32,7 +64,8 @@ export default function ProfilePage() {
           <div>
             <label className="text-sm font-medium">Nom</label>
             <Input
-              value={session.user.name || ""}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               disabled={!isEditing}
               className="mt-2"
             />
@@ -72,15 +105,21 @@ export default function ProfilePage() {
 
         <div className="mt-8 flex gap-4">
           {!isEditing ? (
-            <Button onClick={() => setIsEditing(true)}>
+            <Button onClick={() => {
+              setName(session.user.name || "");
+              setIsEditing(true);
+            }}>
               Modifier le profil
             </Button>
           ) : (
             <>
-              <Button onClick={() => setIsEditing(false)}>
-                Enregistrer
+              <Button onClick={handleSave} disabled={isSaving}>
+                {isSaving ? "Enregistrement..." : "Enregistrer"}
               </Button>
-              <Button variant="outline" onClick={() => setIsEditing(false)}>
+              <Button variant="outline" onClick={() => {
+                setName(session.user.name || "");
+                setIsEditing(false);
+              }} disabled={isSaving}>
                 Annuler
               </Button>
             </>

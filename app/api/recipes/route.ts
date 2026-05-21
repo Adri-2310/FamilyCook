@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { logger } from "@/lib/logger";
 import { headers } from "next/headers";
 
 export async function POST(request: Request) {
@@ -69,8 +70,16 @@ export async function POST(request: Request) {
       },
     });
 
+    await logger.userAction("recipe.create", {
+      userId: session.user.id,
+      metadata: { recipeId: recipe.id, title: recipe.title },
+    });
+
     return Response.json(recipe, { status: 201 });
   } catch (error) {
+    await logger.error("recipe.create-failed", error, {
+      userId: session.user.id,
+    });
     return Response.json(
       { error: "Erreur lors de la création" },
       { status: 500 }
@@ -159,8 +168,16 @@ export async function PUT(request: Request) {
       },
     });
 
+    await logger.userAction("recipe.update", {
+      userId: session.user.id,
+      metadata: { recipeId: updated.id, title: updated.title },
+    });
+
     return Response.json(updated);
   } catch (error) {
+    await logger.error("recipe.update-failed", error, {
+      userId: session.user.id,
+    });
     return Response.json(
       { error: "Erreur lors de la mise à jour" },
       { status: 500 }

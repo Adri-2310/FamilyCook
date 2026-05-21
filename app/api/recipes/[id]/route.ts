@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { logger } from "@/lib/logger";
 import { headers } from "next/headers";
 
 export async function GET(
@@ -68,8 +69,16 @@ export async function DELETE(
       where: { id },
     });
 
+    await logger.userAction("recipe.delete", {
+      userId: session.user.id,
+      metadata: { recipeId: id },
+    });
+
     return Response.json({ success: true });
   } catch (error) {
+    await logger.error("recipe.delete-failed", error, {
+      userId: session.user.id,
+    });
     return Response.json(
       { error: "Erreur lors de la suppression" },
       { status: 500 }

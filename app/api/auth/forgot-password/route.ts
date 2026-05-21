@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { logger } from "@/lib/logger";
 import { randomBytes } from "crypto";
 import nodemailer from "nodemailer";
 
@@ -73,6 +74,11 @@ export async function POST(request: NextRequest) {
       html: emailContent,
     });
 
+    await logger.userAction("auth.forgot-password", {
+      userId: user.id,
+      metadata: { email: user.email },
+    });
+
     return NextResponse.json({
       success: true,
       message: "Si l'email existe, un lien de réinitialisation a été envoyé.",
@@ -85,7 +91,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.error("Forgot password error:", error);
+    await logger.error("auth.forgot-password-failed", error);
     return NextResponse.json(
       { error: "Erreur serveur" },
       { status: 500 }

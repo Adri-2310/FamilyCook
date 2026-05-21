@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { logger } from "@/lib/logger";
 import { headers } from "next/headers";
 
 export async function GET(request: Request) {
@@ -60,12 +61,20 @@ export async function PATCH(request: Request) {
       data: { name },
     });
 
+    await logger.userAction("profile.update", {
+      userId: session.user.id,
+      metadata: { name: updated.name },
+    });
+
     return Response.json({
       id: updated.id,
       name: updated.name,
       email: updated.email,
     });
-  } catch {
+  } catch (error) {
+    await logger.error("profile.update-failed", error, {
+      userId: session.user.id,
+    });
     return Response.json(
       { error: "Erreur lors de la mise à jour du profil" },
       { status: 500 }
@@ -90,8 +99,15 @@ export async function DELETE(request: Request) {
     // Delete user
     await db.user.delete({ where: { id: session.user.id } });
 
+    await logger.userAction("account.delete", {
+      userId: session.user.id,
+    });
+
     return Response.json({ success: true });
-  } catch {
+  } catch (error) {
+    await logger.error("account.delete-failed", error, {
+      userId: session.user.id,
+    });
     return Response.json(
       { error: "Erreur lors de la suppression du compte" },
       { status: 500 }

@@ -1,11 +1,29 @@
 import { ReactNode } from "react";
+import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
+import { auth } from "@/lib/auth";
 import { AppNavbar } from "@/components/app-navbar";
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: ReactNode;
 }) {
+  const cookieStore = await cookies();
+  const session = await auth.api.getSession({
+    headers: {
+      cookie: cookieStore.toString(),
+    },
+  });
+
+  if (!session?.user) {
+    redirect("/auth/login");
+  }
+
+  if (session.user.role !== "ADMIN") {
+    redirect("/");
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
       <AppNavbar />

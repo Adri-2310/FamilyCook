@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { logger } from "@/lib/logger";
 import { ContactType } from "@prisma/client";
 
 const contactSchema = z.object({
@@ -96,8 +97,14 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // TODO: Send email to admin
-    // await sendAdminEmail(message);
+    await logger.userAction("contact.submit", {
+      ipAddress: clientIP,
+      metadata: {
+        referenceNumber: message.referenceNumber,
+        type: validatedData.type,
+        email: validatedData.email,
+      },
+    });
 
     return NextResponse.json({
       success: true,
@@ -105,12 +112,14 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
+      await logger.error("contact.validation-failed", error);
       return NextResponse.json(
         { error: "Données invalides", details: error.errors },
         { status: 400 }
       );
     }
 
+    await logger.error("contact.submit-failed", error);
     return NextResponse.json(
       { error: "Erreur serveur. Veuillez réessayer." },
       { status: 500 }

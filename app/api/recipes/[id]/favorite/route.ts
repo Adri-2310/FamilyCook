@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { logger } from "@/lib/logger";
 
 export async function POST(
   request: NextRequest,
@@ -62,13 +63,20 @@ export async function POST(
       where: { recipeId },
     });
 
+    await logger.userAction("favorite.add", {
+      userId: session.user.id,
+      metadata: { recipeId },
+    });
+
     return NextResponse.json({
       success: true,
       favoriteCount,
       message: "Recette ajoutée aux favoris",
     });
   } catch (error) {
-    console.error("Add favorite error:", error);
+    await logger.error("favorite.add-failed", error, {
+      userId: session.user?.id,
+    });
     return NextResponse.json(
       { error: "Erreur serveur" },
       { status: 500 }
@@ -138,13 +146,20 @@ export async function DELETE(
       where: { recipeId },
     });
 
+    await logger.userAction("favorite.remove", {
+      userId: session.user.id,
+      metadata: { recipeId },
+    });
+
     return NextResponse.json({
       success: true,
       favoriteCount,
       message: "Recette retirée des favoris",
     });
   } catch (error) {
-    console.error("Remove favorite error:", error);
+    await logger.error("favorite.remove-failed", error, {
+      userId: session.user?.id,
+    });
     return NextResponse.json(
       { error: "Erreur serveur" },
       { status: 500 }

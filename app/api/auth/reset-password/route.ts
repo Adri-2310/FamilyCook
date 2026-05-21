@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { logger } from "@/lib/logger";
 import { scrypt, randomBytes } from "crypto";
 import { promisify } from "util";
 
@@ -84,6 +85,11 @@ export async function POST(request: NextRequest) {
     // Delete verification token
     await prisma.verification.delete({ where: { token } });
 
+    await logger.userAction("auth.reset-password", {
+      userId: verification.userId,
+      metadata: { email: verification.user?.email },
+    });
+
     return NextResponse.json({
       success: true,
       message: "Mot de passe réinitialisé avec succès",
@@ -96,7 +102,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.error("Reset password error:", error);
+    await logger.error("auth.reset-password-failed", error);
     return NextResponse.json(
       { error: "Erreur serveur" },
       { status: 500 }
