@@ -93,6 +93,22 @@ enum MessageStatus {
   RESOLVED // Traité / résolu
 }
 
+// Type de log système
+enum LogType {
+  AUTH         // Connexion, déconnexion, inscription, échecs
+  USER_ACTION  // CRUD recettes, favoris, notes
+  SYSTEM_ERROR // Erreurs serveur, exceptions
+  API_ACCESS   // Accès API
+}
+
+// Niveau de log
+enum LogLevel {
+  DEBUG
+  INFO
+  WARN
+  ERROR
+}
+
 // =============================================================================
 // USER & AUTH (Better Auth compatible)
 // =============================================================================
@@ -126,6 +142,7 @@ model User {
   accounts      Account[]
   verifications Verification[]
   messages      Message[]
+  logs          SystemLog[]
 
   @@index([email])
   @@index([role])
@@ -372,4 +389,38 @@ model Message {
   @@index([createdAt])                             // Tri chronologique
   @@index([userId])                                // Messages liés à un utilisateur
   @@map("messages")
+}
+
+// =============================================================================
+// SYSTEM LOGS
+// =============================================================================
+
+// Log système pour audit et debug (auth, actions, erreurs, accès API)
+model SystemLog {
+  id         String    @id @default(cuid())
+  type       LogType                                // AUTH, USER_ACTION, SYSTEM_ERROR, API_ACCESS
+  level      LogLevel  @default(INFO)               // DEBUG, INFO, WARN, ERROR
+  action     String                                 // ex: "auth.sign-in", "recipe.create"
+  message    String                                 // Message descriptif
+  metadata   Json?                                  // Données additionnelles (recipeId, erreur, etc.)
+
+  // Requête HTTP
+  ipAddress  String?
+  userAgent  String?
+  path       String?
+  method     String?
+  statusCode Int?
+  duration   Int?                                   // en ms
+
+  // Auteur
+  userId     String?
+  user       User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  createdAt  DateTime  @default(now())
+
+  @@index([type])                                  // Filtre par type de log
+  @@index([level])                                 // Filtre par niveau de log
+  @@index([userId])                                // Logs d'un utilisateur
+  @@index([createdAt])                             // Tri par date
+  @@map("system_logs")
 }
